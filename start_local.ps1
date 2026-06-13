@@ -5,7 +5,7 @@ function Do-Events {
     $frame = New-Object System.Windows.Threading.DispatcherFrame
     [System.Windows.Threading.Dispatcher]::CurrentDispatcher.BeginInvoke(
         [System.Windows.Threading.DispatcherPriority]::Background,
-        [Action[System.Windows.Threading.DispatcherFrame]]{ params($f) $f.Continue = $false },
+        [Action[System.Windows.Threading.DispatcherFrame]]{ param($f) $f.Continue = $false },
         $frame
     )
     [System.Windows.Threading.Dispatcher]::PushFrame($frame)

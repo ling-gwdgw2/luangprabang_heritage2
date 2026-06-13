@@ -182,7 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <h5 class="mb-3"><i class="fas fa-info-circle text-success"></i> ຂໍ້ມູນທົ່ວໄປ</h5>
                     
                     <div class="mb-3">
-                        <label class="required">QR Code</label>
+                        <label class="required">ລະຫັດເຮືອນ</label>
                         <input type="text" name="qr_code" id="qr_code" class="form-control" required placeholder="ຕົວຢ່າງ: LP_H001">
                         <small class="text-muted">ຕົວຢ່າງ: LP_H001, LP_H002, ...</small>
                     </div>

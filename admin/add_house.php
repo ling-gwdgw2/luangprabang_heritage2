@@ -208,28 +208,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <input type="number" name="construction_year" class="form-control" min="1000" max="2025">
                         </div>
                     </div>
-                    
-                    <div class="mb-3">
-                        <label>ເຈົ້າຂອງ (ລາວ)</label>
-                        <input type="text" name="owner_name_lo" class="form-control">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label>ເຈົ້າຂອງ (ອັງກິດ)</label>
-                        <input type="text" name="owner_name_en" class="form-control">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label>ສະຖາປັດຕະຍະກຳ (ລາວ)</label>
-                        <input type="text" name="architectural_style_lo" class="form-control">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label>ສະຖາປັດຕະຍະກຳ (ອັງກິດ)</label>
-                        <input type="text" name="architectural_style_en" class="form-control">
-                    </div>
-                </div>
-            </div>
+                   
 
             <div class="col-md-6">
                 <div class="card-custom">

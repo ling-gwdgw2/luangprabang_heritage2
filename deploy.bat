@@ -13,15 +13,16 @@ if %errorlevel% neq 0 (
 )
 
 :: Ask for Commit Message
+set "commit_msg="
 set /p commit_msg="Enter commit message (Press Enter for default): "
 if "%commit_msg%"=="" (
-    set commit_msg="Update system configuration and features"
+    set commit_msg=Update system configuration and features
 )
 
 echo.
 echo --> 1. Pushing to GitHub...
 git add .
-git commit -m %commit_msg%
+git commit -m "%commit_msg%"
 git push origin main
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to push to GitHub.

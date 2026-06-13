@@ -51,7 +51,7 @@ if %errorlevel% neq 0 (
     if not "%MYSQL_PATH%"=="" (
         echo [INFO] Starting MySQL database server in background...
         start /b "" %MYSQL_PATH% --console
-        timeout /t 3 >nul
+        ping 127.0.0.1 -n 4 >nul
     ) else (
         echo [WARNING] MySQL server not found. If your database is not running, the website will show connection errors.
     )

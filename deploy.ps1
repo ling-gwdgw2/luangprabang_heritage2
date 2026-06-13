@@ -297,6 +297,10 @@ function Run-Deploy {
     Set-Status 55 $msg.step3_run
     Append-Log $msg.log_push_start
     
+    # Auto pull to prevent push rejection
+    Append-Log "[Git] Pulling latest updates from GitHub (git pull --no-edit origin main)..."
+    git pull --no-edit origin main 2>&1 | ForEach-Object { Append-Log $_.ToString(); Do-Events }
+    
     # Capture push output line-by-line
     $gitPushFailed = $false
     git push origin main 2>&1 | ForEach-Object {

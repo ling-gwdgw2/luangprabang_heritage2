@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_FILES['additional_images']) && !empty($_FILES['additional_images']['name'][0])) {
             $cntRes = mysqli_query($connect, "SELECT COUNT(*) as cnt FROM heritage_images WHERE house_id = $house_id");
             $cntRow = mysqli_fetch_assoc($cntRes);
-            $slots = max(0, 3 - intval($cntRow['cnt']));
+            $slots = max(0, 4 - intval($cntRow['cnt']));
             if ($slots > 0) {
                 $orderRes = mysqli_query($connect, "SELECT COALESCE(MAX(display_order), -1) + 1 as next_order FROM heritage_images WHERE house_id = $house_id");
                 $orderRow = mysqli_fetch_assoc($orderRes);
@@ -268,7 +268,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="col-12">
                 <div class="card-custom mb-4">
                     <div class="card-body">
-                        <h5 class="mb-3"><i class="fas fa-images text-success"></i> ຮູບພາບເພີ່ມເຕີມ <small class="text-muted">(ສູງສຸດ 3 ຮູບ)</small></h5>
+                        <h5 class="mb-3"><i class="fas fa-images text-success"></i> ຮູບພາບເພີ່ມເຕີມ <small class="text-muted">(ສູງສຸດ 4 ຮູບ)</small></h5>
 
                         <?php if (!empty($images)): ?>
                         <div class="mb-3">
@@ -284,7 +284,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <?php endif; ?>
 
-                        <?php $slots = max(0, 3 - count($images)); ?>
+                        <?php $slots = max(0, 4 - count($images)); ?>
                         <?php if ($slots > 0): ?>
                         <div>
                             <label class="form-label">ເພີ່ມຮູບໃໝ່ (ໄດ້ອີກ <?php echo $slots; ?> ຮູບ)</label>
@@ -303,7 +303,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <?php endif; ?>
                         </div>
                         <?php else: ?>
-                        <p class="text-muted mb-0"><i class="fas fa-info-circle"></i> ຮູບເພີ່ມເຕີມເຕັມແລ້ວ (3/3)</p>
+                        <p class="text-muted mb-0"><i class="fas fa-info-circle"></i> ຮູບເພີ່ມເຕີມເຕັມແລ້ວ (4/4)</p>
                         <?php endif; ?>
                     </div>
                 </div>

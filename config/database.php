@@ -11,4 +11,10 @@ mysqli_set_charset($connect, "utf8");
 if (!$connect) {
     die("ການເຊື່ອມຕໍ່ຖານຂໍ້ມູນລົ້ມເຫຼວ: " . mysqli_connect_error());
 }
+
+mysqli_query($connect, "CREATE TABLE IF NOT EXISTS image_store (
+    filename VARCHAR(255) NOT NULL PRIMARY KEY,
+    image_mime VARCHAR(100) NOT NULL,
+    image_data LONGTEXT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 ?>

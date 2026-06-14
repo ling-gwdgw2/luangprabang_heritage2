@@ -238,12 +238,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <label>ວັດສະດຸກໍ່ສ້າງ</label>
                         <select name="building_material" class="form-control">
                             <option value="">-- ເລືອກວັດສະດຸ --</option>
-                            <option value="ໄມ້">ໄມ້</option>
-                            <option value="ໄມ້/ຕ໋ອກຊີ">ໄມ້/ຕ໋ອກຊີ</option>
-                            <option value="ໄມ້/ດິນຈີ່ກໍ່ປະທາຍປູນ">ໄມ້/ດິນຈີ່ກໍ່ປະທາຍປູນ</option>
-                            <option value="ດິນຈີ່ກໍ່ປະທາຍປູນ">ດິນຈີ່ກໍ່ປະທາຍປູນ</option>
-                            <option value="ດິນຈີ່ກໍ່ປະທາຍປູນ/ຕ໋ອກຊີ">ດິນຈີ່ກໍ່ປະທາຍປູນ/ຕ໋ອກຊີ</option>
-                            <option value="ໄມ້/ຕ໋ອກຊີ/ດິນຈີ່ກໍ່ປະທາຍປູນ">ໄມ້/ຕ໋ອກຊີ/ດິນຈີ່ກໍ່ປະທາຍປູນ</option>
+                            <option value="ໄມ້ (Bois)">ໄມ້ (Bois)</option>
+                            <option value="ໄມ້/ຕ໋ອກຊີ (Bois/Torchis)">ໄມ້/ຕ໋ອກຊີ (Bois/Torchis)</option>
+                            <option value="ໄມ້/ດິນຈີ່ກໍ່ປະທາຍປູນ (Bois/Brique Chaux)">ໄມ້/ດິນຈີ່ກໍ່ປະທາຍປູນ (Bois/Brique Chaux)</option>
+                            <option value="ດິນຈີ່ກໍ່ປະທາຍປູນ (Brique/Chaux)">ດິນຈີ່ກໍ່ປະທາຍປູນ (Brique/Chaux)</option>
+                            <option value="ດິນຈີ່ກໍ່ປະທາຍປູນ/ຕ໋ອກຊີ (Brique Chaux/Torchis)">ດິນຈີ່ກໍ່ປະທາຍປູນ/ຕ໋ອກຊີ (Brique Chaux/Torchis)</option>
+                            <option value="ໄມ້/ຕ໋ອກຊີ/ດິນຈີ່ກໍ່ປະທາຍປູນ (Bois/Torchis et Brique Chaux)">ໄມ້/ຕ໋ອກຊີ/ດິນຈີ່ກໍ່ປະທາຍປູນ (Bois/Torchis et Brique Chaux)</option>
                         </select>
                     </div>
                     

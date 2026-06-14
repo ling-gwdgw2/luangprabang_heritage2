@@ -237,7 +237,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <label class="form-label">ວັດສະດຸກໍ່ສ້າງ</label>
                                 <select name="building_material" class="form-control">
                                     <option value="">-- ເລືອກວັດສະດຸ --</option>
-                                    <?php foreach (['ໄມ້','ໄມ້/ຕ໋ອກຊີ','ໄມ້/ດິນຈີ່ກໍ່ປະທາຍປູນ','ດິນຈີ່ກໍ່ປະທາຍປູນ','ດິນຈີ່ກໍ່ປະທາຍປູນ/ຕ໋ອກຊີ','ໄມ້/ຕ໋ອກຊີ/ດິນຈີ່ກໍ່ປະທາຍປູນ'] as $bm): ?>
+                                    <?php foreach ([
+                                        'ໄມ້ (Bois)',
+                                        'ໄມ້/ຕ໋ອກຊີ (Bois/Torchis)',
+                                        'ໄມ້/ດິນຈີ່ກໍ່ປະທາຍປູນ (Bois/Brique Chaux)',
+                                        'ດິນຈີ່ກໍ່ປະທາຍປູນ (Brique/Chaux)',
+                                        'ດິນຈີ່ກໍ່ປະທາຍປູນ/ຕ໋ອກຊີ (Brique Chaux/Torchis)',
+                                        'ໄມ້/ຕ໋ອກຊີ/ດິນຈີ່ກໍ່ປະທາຍປູນ (Bois/Torchis et Brique Chaux)',
+                                    ] as $bm): ?>
                                         <option value="<?php echo $bm; ?>" <?php echo $house['building_material'] === $bm ? 'selected' : ''; ?>><?php echo $bm; ?></option>
                                     <?php endforeach; ?>
                                 </select>

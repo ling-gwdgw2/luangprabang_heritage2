@@ -215,7 +215,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <label class="form-label">ປະເພດເຮືອນ</label>
                                 <select name="house_type" class="form-control">
                                     <option value="">-- ເລືອກປະເພດເຮືອນ --</option>
-                                    <?php foreach (['ຫຼັງຄາດ່ຽວ','ຫຼັງຄາດ່ຽວມີເຊຍ','ຫຼັງຄາດ່ຽວເຮືອນຄົວຂວາງ','ເຮືອນເປັນຫ້ອງແຖວ','ອາຄານຫ້ອງແຖວເປັນລະບົບ','ເຮືອນແບບປະສົມ'] as $ht): ?>
+                                    <?php foreach ([
+                                        'ຫຼັງຄາດ່ຽວ',
+                                        'ຫຼັງຄາດ່ຽວ (Single-Pitch Roof)',
+                                        'ຫຼັງຄາດ່ຽວມີເຊຍ',
+                                        'ຫຼັງຄາດ່ຽວມີເຊຍ (Single-Pitch Roof with Gable)',
+                                        'ຫຼັງຄາດ່ຽວເຮືອນຄົວຂວາງ',
+                                        'ຫຼັງຄາດ່ຽວເຮືອນຄົວຂວາງ (Single-Pitch Roof with Detached Kitchen)',
+                                        'ເຮືອນເປັນຫ້ອງແຖວ',
+                                        'ເຮືອນເປັນຫ້ອງແຖວ (Row House)',
+                                        'ອາຄານຫ້ອງແຖວເປັນລະບົບ',
+                                        'ອາຄານຫ້ອງແຖວເປັນລະບົບ (Systematic Row House Building)',
+                                        'ເຮືອນແບບປະສົມ',
+                                        'ເຮືອນແບບປະສົມ (Mixed-Style House)',
+                                    ] as $ht): ?>
                                         <option value="<?php echo $ht; ?>" <?php echo $house['house_type'] === $ht ? 'selected' : ''; ?>><?php echo $ht; ?></option>
                                     <?php endforeach; ?>
                                 </select>

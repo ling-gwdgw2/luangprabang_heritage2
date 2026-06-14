@@ -114,7 +114,7 @@ $result = mysqli_query($connect, $query);
                             <th style="width: 20%">ຊື່ເຮືອນ (ລາວ)</th>
                             <th style="width: 20%">ຊື່ເຮືອນ (ອັງກິດ)</th>
                             <th style="width: 10%">ສະຖານະ</th>
-                            <th style="width: 10%">ຜູ້ເຂົ້າຊົມ</th>
+                            <th style="width: 10%; display:none">ຜູ້ເຂົ້າຊົມ</th>
                             <th style="width: 20%">ການຈັດການ</th>
                         </tr>
                     </thead>

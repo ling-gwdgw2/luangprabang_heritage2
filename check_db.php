@@ -18,6 +18,16 @@ if ($connect) {
         echo "<p style='color:red'>❌ ຍັງບໍ່ມີຂໍ້ມູນ! ກະລຸນານຳເຂົ້າຖານຂໍ້ມູນກ່ອນ</p>";
     }
 
+    // Create image_store table for persistent image storage on Railway
+    mysqli_query($connect, "CREATE TABLE IF NOT EXISTS image_store (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        filename VARCHAR(255) UNIQUE NOT NULL,
+        image_mime VARCHAR(100),
+        image_data LONGBLOB,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+    echo "<p style='color:green'>✅ image_store table ready</p>";
+
     // Fix visit_logs schema: add missing columns if they don't exist
     echo "<h2>ກວດສອບ visit_logs...</h2>";
     $fixes = [

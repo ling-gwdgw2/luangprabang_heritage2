@@ -202,7 +202,7 @@
             function toImageSrc(path) {
                 if (!path) return null;
                 const clean = path.replace(/^uploads\//, '');
-                return `uploads/${clean}`;
+                return `img.php?f=${encodeURIComponent(clean)}`;
             }
 
             allImages = [];

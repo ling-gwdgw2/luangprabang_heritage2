@@ -62,6 +62,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $new_filename = time() . '_' . uniqid() . '.' . $ext;
                 if (move_uploaded_file($_FILES['image_main']['tmp_name'], $upload_dir . $new_filename)) {
                     $image_main = $new_filename;
+                    $img_data = base64_encode(file_get_contents($upload_dir . $new_filename));
+                    $img_mime = mysqli_real_escape_string($connect, mime_content_type($upload_dir . $new_filename));
+                    $img_fn   = mysqli_real_escape_string($connect, $new_filename);
+                    mysqli_query($connect, "INSERT INTO image_store (filename, image_mime, image_data) VALUES ('$img_fn','$img_mime','$img_data') ON DUPLICATE KEY UPDATE image_data='$img_data'");
                 }
             }
         }
@@ -97,6 +101,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $cap_lo = isset($_POST['image_caption_lo'][$i]) ? mysqli_real_escape_string($connect, $_POST['image_caption_lo'][$i]) : '';
                                 $cap_en = isset($_POST['image_caption_en'][$i]) ? mysqli_real_escape_string($connect, $_POST['image_caption_en'][$i]) : '';
                                 mysqli_query($connect, "INSERT INTO heritage_images (house_id, image_path, image_caption_lo, image_caption_en, display_order) VALUES ($house_id, '$new_filename', '$cap_lo', '$cap_en', $i)");
+                                $img_data = base64_encode(file_get_contents($upload_dir . $new_filename));
+                                $img_mime = mysqli_real_escape_string($connect, mime_content_type($upload_dir . $new_filename));
+                                $img_fn   = mysqli_real_escape_string($connect, $new_filename);
+                                mysqli_query($connect, "INSERT INTO image_store (filename, image_mime, image_data) VALUES ('$img_fn','$img_mime','$img_data') ON DUPLICATE KEY UPDATE image_data='$img_data'");
                             }
                         }
                     }

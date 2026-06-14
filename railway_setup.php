@@ -70,6 +70,14 @@ if ($connect) {
         FOREIGN KEY (house_id) REFERENCES heritage_houses(house_id) ON DELETE CASCADE
     );
     
+    CREATE TABLE IF NOT EXISTS image_store (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        filename VARCHAR(255) UNIQUE NOT NULL,
+        image_mime VARCHAR(100),
+        image_data LONGBLOB,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE TABLE IF NOT EXISTS visit_logs (
         log_id INT AUTO_INCREMENT PRIMARY KEY,
         house_id INT,

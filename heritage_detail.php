@@ -74,12 +74,8 @@
         .dot.active { background: #dfb26a; width: 28px; border-radius: 10px; }
         .fullscreen-btn { position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,0.5); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; transition: all 0.3s; z-index: 10; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; backdrop-filter: blur(2px); }
         .fullscreen-btn:hover { background: #dfb26a; color: #1a472a; transform: scale(1.1); }
-        .slide-caption-bar { text-align: center; padding: 12px 24px; background: linear-gradient(135deg, #1a472a, #2d6a4f); color: #fff; font-size: 1rem; font-weight: 600; letter-spacing: 0.3px; min-height: 0; transition: all 0.3s; display: none; }
-        .slide-caption-bar.has-text { display: block; min-height: 44px; }
-        .slide-broken { display: flex; align-items: center; justify-content: center; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #1a2e1a; flex-direction: column; gap: 12px; }
-        .slide-broken i { color: #dfb26a; font-size: 3rem; }
-        .slide-broken span { color: #ccc; font-size: 1rem; text-align: center; padding: 0 20px; }
         .slide { position: relative; }
+        .slide-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: 16px 24px; background: linear-gradient(transparent, rgba(0,0,0,0.72)); color: #fff; font-size: 1rem; font-weight: 600; letter-spacing: 0.3px; z-index: 5; }
         
         .thumbnail-gallery { display: flex; gap: 15px; overflow-x: auto; padding: 20px; background: rgba(0,0,0,0.02); border-bottom: 1px solid rgba(0,0,0,0.05); }
         .thumbnail-gallery::-webkit-scrollbar { height: 6px; }
@@ -224,14 +220,9 @@
             for (let i = 0; i < allImages.length; i++) {
                 const cap = allImages[i].caption || '';
                 html += `<div class="slide ${i === 0 ? 'active' : ''}" data-index="${i}">
-                            <div class="slide-broken" id="broken-${i}">
-                                <i class="fas fa-image"></i>
-                                <span>${cap}</span>
-                            </div>
                             <img src="${allImages[i].src}" alt="${cap || 'Slide ' + (i+1)}" onclick="openFullscreen()"
-                                 onload="document.getElementById('broken-${i}').style.display='none'; this.style.display='block';"
-                                 onerror="if(!this.dataset.retried){this.dataset.retried=1;this.src='img.php?f='+encodeURIComponent(this.src.split('/').pop());}else{document.getElementById('broken-${i}').style.display='flex';this.style.display='none';}"
-                                 style="display:none;">
+                                 onerror="if(!this.dataset.retried){this.dataset.retried=1;this.src='img.php?f='+encodeURIComponent(this.src.split('/').pop());}else{this.style.opacity='0.2';}">
+                            ${cap ? `<div class="slide-caption">${escapeHtml(cap)}</div>` : ''}
                          </div>`;
             }
             if (allImages.length > 1) {
@@ -244,8 +235,7 @@
                 html += `</div>`;
             }
             html += `<button class="fullscreen-btn" onclick="openFullscreen()"><i class="fas fa-expand"></i></button>
-                    </div>
-                    <div class="slide-caption-bar ${allImages[0].caption ? 'has-text' : ''}" id="slideCaptionBar">${escapeHtml(allImages[0].caption || '')}</div>`;
+                    </div>`;
             
             if (allImages.length > 1) {
                 html += `<div class="thumbnail-gallery" id="thumbnailGallery">`;
@@ -330,13 +320,6 @@
             $('.thumbnail').removeClass('active');
             $('.thumbnail').eq(index).addClass('active');
             currentSlideIndex = index;
-
-            const captionBar = document.getElementById('slideCaptionBar');
-            if (captionBar) {
-                const cap = allImages[index].caption || '';
-                captionBar.textContent = cap;
-                captionBar.classList.toggle('has-text', cap !== '');
-            }
         }
         
         function startAutoSlide() {

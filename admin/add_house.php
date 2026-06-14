@@ -265,11 +265,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label>ປະຫວັດຂອງເຮືອນ (ລາວ)</label>
+                    <label>ຂໍ້ມູນເຮືອນ (ລາວ)</label>
                     <textarea name="historical_significance_lo" class="form-control" rows="3" placeholder="ອະທິບາຍຄວາມສຳຄັນ..."></textarea>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label>ປະຫວັດຂອງເຮືອນ (ອັງກິດ)</label>
+                    <label>ຂໍ້ມູນເຮືອນ (ອັງກິດ)</label>
                     <textarea name="historical_significance_en" class="form-control" rows="3" placeholder="Historical significance..."></textarea>
                 </div>
             </div>

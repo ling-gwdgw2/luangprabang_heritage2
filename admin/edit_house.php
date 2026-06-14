@@ -256,12 +256,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <h5 class="mb-3"><i class="fas fa-history text-success"></i> ຂໍ້ມູນລາຍລະອຽດ</h5>
                         
                         <div class="mb-3">
-                            <label class="form-label">ຄວາມສຳຄັນທາງປະຫວັດສາດ (ລາວ)</label>
+                            <label class="form-label">ຂໍ້ມູນເຮືອນ (ລາວ)</label>
                             <textarea name="historical_significance_lo" class="form-control" rows="3"><?php echo htmlspecialchars($house['historical_significance_lo']); ?></textarea>
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">ຄວາມສຳຄັນທາງປະຫວັດສາດ (ອັງກິດ)</label>
+                            <label class="form-label">ຂໍ້ມູນເຮືອນ (ອັງກິດ)</label>
                             <textarea name="historical_significance_en" class="form-control" rows="3"><?php echo htmlspecialchars($house['historical_significance_en']); ?></textarea>
                         </div>
                         

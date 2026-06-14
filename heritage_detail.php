@@ -193,13 +193,19 @@
             const historicalSignificance = isLao ? data.historical_significance_lo : data.historical_significance_en;
             const description = isLao ? data.description_lo : data.description_en;
             
+            function toImageSrc(path) {
+                if (!path) return null;
+                const clean = path.replace(/^uploads\//, '');
+                return `uploads/${clean}`;
+            }
+
             allImages = [];
             if (data.image_main && data.image_main !== '') {
-                allImages.push({ src: `uploads/${data.image_main}`, caption: isLao ? 'ຮູບຫຼັກ' : 'Main Image' });
+                allImages.push({ src: toImageSrc(data.image_main), caption: isLao ? 'ຮູບຫຼັກ' : 'Main Image' });
             }
             if (data.images && data.images.length > 0) {
                 data.images.forEach(img => {
-                    allImages.push({ src: `uploads/${img.image_path}`, caption: isLao ? img.image_caption_lo : img.image_caption_en });
+                    allImages.push({ src: toImageSrc(img.image_path), caption: isLao ? img.image_caption_lo : img.image_caption_en });
                 });
             }
             if (allImages.length === 0) {

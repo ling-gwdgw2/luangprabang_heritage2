@@ -103,6 +103,21 @@
         .share-btn:hover { transform: translateY(-4px) scale(1.05); filter: brightness(1.05); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .back-button { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #d4a373, #b5835a); color: white; padding: 14px 40px; border-radius: 50px; text-decoration: none; font-weight: bold; box-shadow: 0 8px 25px rgba(212,163,115,0.4); transition: all 0.3s; margin: 30px 0; }
         .back-button:hover { background: linear-gradient(135deg, #b5835a, #996e49); color: white; transform: translateX(-5px); box-shadow: 0 12px 35px rgba(212,163,115,0.6); }
+        .btn-lang {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+            border-radius: 50px;
+            padding: 10px 22px;
+            font-weight: bold;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            transition: all 0.3s;
+        }
+        .btn-lang:hover { transform: scale(1.05); background: white; box-shadow: 0 12px 40px rgba(0,0,0,0.2); }
         
         .loading-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 450px; }
         .loading-spinner { width: 65px; height: 65px; border: 5px solid rgba(255,255,255,0.1); border-top-color: #dfb26a; border-radius: 50%; animation: spin 1s linear infinite; }
@@ -118,8 +133,10 @@
     </style>
 </head>
 <body>
+    <button class="btn-lang" onclick="toggleLanguage()"><i class="fas fa-globe"></i> <span id="lang-text">English</span></button>
+
     <div class="container py-4">
-        <div id="detail-content" class="fade-in-up"><div class="loading-container"><div class="loading-spinner"></div><p class="mt-3 text-muted">ກຳລັງໂຫຼດຂໍ້ມູນ...</p></div></div>
+        <div id="detail-content" class="fade-in-up"><div class="loading-container"><div class="loading-spinner"></div><p class="mt-3 text-muted" id="loading-text">ກຳລັງໂຫຼດຂໍ້ມູນ...</p></div></div>
         <div class="text-center"><a href="index.php" class="back-button" id="back-btn"><i class="fas fa-arrow-left"></i> <span id="back-text">ກັບຄືນ</span></a></div>
     </div>
     
@@ -137,11 +154,22 @@
         }
         qrId = extractIdFromUrl(qrId);
         
+        function toggleLanguage() {
+            const newLang = lang === 'lo' ? 'en' : 'lo';
+            window.location.href = `heritage_detail.php?id=${encodeURIComponent(qrId)}&lang=${newLang}`;
+        }
+        
+        function updateLangButton() {
+            $('#lang-text').text(lang === 'lo' ? 'English' : 'ພາສາລາວ');
+            $('#loading-text').text(lang === 'lo' ? 'ກຳລັງໂຫຼດຂໍ້ມູນ...' : 'Loading...');
+            $('#back-text').text(lang === 'lo' ? 'ກັບຄືນ' : 'Back');
+        }
+        
         let currentSlideIndex = 0;
         let allImages = [];
         let slideInterval;
         
-        $(document).ready(function() { loadHeritageDetail(); $('#back-text').text(lang === 'lo' ? 'ກັບຄືນ' : 'Back'); });
+        $(document).ready(function() { updateLangButton(); loadHeritageDetail(); });
         
         function loadHeritageDetail() {
             $.ajax({
@@ -178,7 +206,7 @@
                 allImages.push({ src: 'https://placehold.co/800x500/2d6a4f/white?text=ມໍລະດົກຫຼວງພະບາງ', caption: '' });
             }
             
-            let html = `<div class="hero-section"><h1>${escapeHtml(houseName || data.house_number || 'ເຮືອນມໍລະດົກຫຼວງພະບາງ')}</h1>${data.house_number ? `<p class="subtitle"><i class="fas fa-map-pin"></i> ເລກທີ່ ${data.house_number}</p>` : ''}<div class="qr-badge"><i class="fas fa-qrcode"></i> ${data.qr_code}</div></div>
+            let html = `<div class="hero-section"><h1>${escapeHtml(houseName || data.house_number || (isLao ? 'ເຮືອນມໍລະດົກຫຼວງພະບາງ' : 'Luang Prabang Heritage House'))}</h1>${data.house_number ? `<p class="subtitle"><i class="fas fa-map-pin"></i> ${isLao ? 'ເລກທີ່' : 'No.'} ${data.house_number}</p>` : ''}<div class="qr-badge"><i class="fas fa-qrcode"></i> ${data.qr_code}</div></div>
                         <div class="heritage-card">
                         <div class="main-slider-container" id="mainSlider">`;
             
@@ -248,13 +276,13 @@
                 }, 300);
             }
             
-            html += `<div class="share-section"><div class="info-title mb-3"><i class="fas fa-share-alt"></i> ແບ່ງປັນ</div>
+            html += `<div class="share-section"><div class="info-title mb-3"><i class="fas fa-share-alt"></i> ${isLao ? 'ແບ່ງປັນ' : 'Share'}</div>
                    
                     <a href="#" class="share-btn copy" onclick="copyToClipboard(); return false;"><i class="fas fa-link"></i></a>
                     </div></div>`;
             
             $('#detail-content').html(html);
-            document.title = `${houseName || 'ມໍລະດົກ'} - ມໍລະດົກຫຼວງພະບາງ`;
+            document.title = `${houseName || (isLao ? 'ມໍລະດົກ' : 'Heritage')} - ${isLao ? 'ມໍລະດົກຫຼວງພະບາງ' : 'Luang Prabang Heritage'}`;
             
             if (allImages.length > 1) {
                 startAutoSlide();

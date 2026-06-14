@@ -76,10 +76,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         status='$status' 
     WHERE house_id=$house_id";
     
-    if (mysqli_query($connect, $updateQuery)) { 
-        $message = 'ອັບເດດຂໍ້ມູນສຳເລັດ!'; 
-        $message_type = 'success'; 
-    } else { 
+    if (mysqli_query($connect, $updateQuery)) {
+        if (isset($_FILES['additional_images']) && !empty($_FILES['additional_images']['name'][0])) {
+            $cntRes = mysqli_query($connect, "SELECT COUNT(*) as cnt FROM heritage_images WHERE house_id = $house_id");
+            $cntRow = mysqli_fetch_assoc($cntRes);
+            $slots = max(0, 3 - intval($cntRow['cnt']));
+            if ($slots > 0) {
+                $orderRes = mysqli_query($connect, "SELECT COALESCE(MAX(display_order), -1) + 1 as next_order FROM heritage_images WHERE house_id = $house_id");
+                $orderRow = mysqli_fetch_assoc($orderRes);
+                $order = intval($orderRow['next_order']);
+                $total = min(count($_FILES['additional_images']['name']), $slots);
+                for ($i = 0; $i < $total; $i++) {
+                    if ($_FILES['additional_images']['error'][$i] === UPLOAD_ERR_OK) {
+                        $ext = strtolower(pathinfo($_FILES['additional_images']['name'][$i], PATHINFO_EXTENSION));
+                        if (in_array($ext, $allowed)) {
+                            $new_filename = time() . '_' . uniqid() . '_' . $i . '.' . $ext;
+                            if (move_uploaded_file($_FILES['additional_images']['tmp_name'][$i], $upload_dir . $new_filename)) {
+                                $cap_lo = isset($_POST['image_caption_lo'][$i]) ? mysqli_real_escape_string($connect, $_POST['image_caption_lo'][$i]) : '';
+                                $cap_en = isset($_POST['image_caption_en'][$i]) ? mysqli_real_escape_string($connect, $_POST['image_caption_en'][$i]) : '';
+                                mysqli_query($connect, "INSERT INTO heritage_images (house_id, image_path, image_caption_lo, image_caption_en, display_order) VALUES ($house_id, '$new_filename', '$cap_lo', '$cap_en', $order)");
+                                $order++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        $message = 'ອັບເດດຂໍ້ມູນສຳເລັດ!';
+        $message_type = 'success';
+    } else {
         $message = 'ຜິດພາດ: ' . mysqli_error($connect); 
         $message_type = 'danger'; 
     }
@@ -248,6 +273,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
         
+        <div class="row">
+            <div class="col-12">
+                <div class="card-custom mb-4">
+                    <div class="card-body">
+                        <h5 class="mb-3"><i class="fas fa-images text-success"></i> ຮູບພາບເພີ່ມເຕີມ <small class="text-muted">(ສູງສຸດ 3 ຮູບ)</small></h5>
+
+                        <?php if (!empty($images)): ?>
+                        <div class="mb-3">
+                            <label class="form-label">ຮູບທີ່ມີຢູ່</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                <?php foreach ($images as $img): ?>
+                                <div class="text-center">
+                                    <img src="../uploads/<?php echo htmlspecialchars($img['image_path']); ?>" class="image-preview d-block">
+                                    <?php if ($img['image_caption_lo']): ?><small class="text-muted"><?php echo htmlspecialchars($img['image_caption_lo']); ?></small><?php endif; ?>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
+                        <?php $slots = max(0, 3 - count($images)); ?>
+                        <?php if ($slots > 0): ?>
+                        <div>
+                            <label class="form-label">ເພີ່ມຮູບໃໝ່ (ໄດ້ອີກ <?php echo $slots; ?> ຮູບ)</label>
+                            <div id="add-img-rows">
+                                <div class="row mb-2 add-img-row">
+                                    <div class="col-md-5"><input type="file" name="additional_images[]" class="form-control" accept="image/*"></div>
+                                    <div class="col-md-3"><input type="text" name="image_caption_lo[]" class="form-control" placeholder="ຄຳອະທິບາຍ (ລາວ)"></div>
+                                    <div class="col-md-3"><input type="text" name="image_caption_en[]" class="form-control" placeholder="Caption (En)"></div>
+                                    <div class="col-md-1"><button type="button" class="btn btn-outline-danger btn-sm" onclick="removeRow(this)"><i class="fas fa-trash"></i></button></div>
+                                </div>
+                            </div>
+                            <?php if ($slots > 1): ?>
+                            <button type="button" class="btn btn-outline-success btn-sm mt-1" onclick="addRow()" id="addRowBtn">
+                                <i class="fas fa-plus"></i> ເພີ່ມຮູບ
+                            </button>
+                            <?php endif; ?>
+                        </div>
+                        <?php else: ?>
+                        <p class="text-muted mb-0"><i class="fas fa-info-circle"></i> ຮູບເພີ່ມເຕີມເຕັມແລ້ວ (3/3)</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="text-center mb-4">
             <button type="button" class="btn-custom btn-lg px-5" id="submitBtn">
                 <i class="fas fa-save"></i> ບັນທຶກການແກ້ໄຂ
@@ -260,6 +331,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <script>
+// Additional images: add/remove rows (capped server-side at 3)
+var maxSlots = <?php echo $slots ?? 0; ?>;
+var rowCount = 1;
+function addRow() {
+    if (rowCount >= maxSlots) return;
+    var row = '<div class="row mb-2 add-img-row">' +
+        '<div class="col-md-5"><input type="file" name="additional_images[]" class="form-control" accept="image/*"></div>' +
+        '<div class="col-md-3"><input type="text" name="image_caption_lo[]" class="form-control" placeholder="ຄຳອະທິບາຍ (ລາວ)"></div>' +
+        '<div class="col-md-3"><input type="text" name="image_caption_en[]" class="form-control" placeholder="Caption (En)"></div>' +
+        '<div class="col-md-1"><button type="button" class="btn btn-outline-danger btn-sm" onclick="removeRow(this)"><i class="fas fa-trash"></i></button></div>' +
+        '</div>';
+    document.getElementById('add-img-rows').insertAdjacentHTML('beforeend', row);
+    rowCount++;
+    if (rowCount >= maxSlots) document.getElementById('addRowBtn') && (document.getElementById('addRowBtn').disabled = true);
+}
+function removeRow(btn) {
+    var rows = document.querySelectorAll('#add-img-rows .add-img-row');
+    if (rows.length <= 1) return;
+    btn.closest('.add-img-row').remove();
+    rowCount--;
+    if (document.getElementById('addRowBtn')) document.getElementById('addRowBtn').disabled = false;
+}
+
 // ສະແດງຕົວຢ່າງຮູບກ່ອນອັບ
 document.getElementById('main_image').addEventListener('change', function(e) {
     const preview = document.getElementById('main_preview');

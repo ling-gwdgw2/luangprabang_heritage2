@@ -45,14 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $latitude = isset($_POST['latitude']) && $_POST['latitude'] !== '' ? floatval($_POST['latitude']) : 'NULL';
     $longitude = isset($_POST['longitude']) && $_POST['longitude'] !== '' ? floatval($_POST['longitude']) : 'NULL';
     $status = isset($_POST['status']) ? mysqli_real_escape_string($connect, $_POST['status']) : 'active';
-    $house_type = isset($_POST['house_type']) ? mysqli_real_escape_string($connect, $_POST['house_type']) : '';
-    $building_material = isset($_POST['building_material']) ? mysqli_real_escape_string($connect, $_POST['building_material']) : '';
-
+    
     $image_main = $house['image_main'];
-    if (!empty($_POST['remove_image_main']) && $_POST['remove_image_main'] == '1') {
-        if ($image_main && file_exists($upload_dir . $image_main)) unlink($upload_dir . $image_main);
-        $image_main = '';
-    } elseif (isset($_FILES['image_main']) && $_FILES['image_main']['error'] === UPLOAD_ERR_OK) {
+    if (isset($_FILES['image_main']) && $_FILES['image_main']['error'] === UPLOAD_ERR_OK) {
         $ext = strtolower(pathinfo($_FILES['image_main']['name'], PATHINFO_EXTENSION));
         if (in_array($ext, $allowed)) {
             if ($image_main && file_exists($upload_dir . $image_main)) unlink($upload_dir . $image_main);
@@ -77,10 +72,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         description_en='$description_en', 
         latitude=$latitude, 
         longitude=$longitude, 
-        image_main='$image_main',
-        status='$status',
-        house_type='$house_type',
-        building_material='$building_material'
+        image_main='$image_main', 
+        status='$status' 
     WHERE house_id=$house_id";
     
     if (mysqli_query($connect, $updateQuery)) {
@@ -112,8 +105,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = 'ອັບເດດຂໍ້ມູນສຳເລັດ!';
         $message_type = 'success';
     } else {
-        $message = 'ຜິດພາດ: ' . mysqli_error($connect);
-        $message_type = 'danger';
+        $message = 'ຜິດພາດ: ' . mysqli_error($connect); 
+        $message_type = 'danger'; 
     }
 }
 ?>
@@ -143,9 +136,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .btn-cancel:hover { background: #5a6268; }
         .form-label { font-weight: bold; color: #1a472a; }
         .image-preview { width: 100px; height: 100px; object-fit: cover; border-radius: 10px; margin: 5px; }
-        .img-wrap { position: relative; display: inline-block; }
-        .img-remove-btn { position: absolute; top: 0; right: 0; background: #dc3545; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 14px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3); transition: background 0.2s; }
-        .img-remove-btn:hover { background: #a71d2a; }
         @media (max-width: 768px) { .sidebar { width: 70px; } .sidebar .nav-link span:not(.nav-icon) { display: none; } .main-content { margin-left: 70px; } }
     </style>
 </head>
@@ -196,13 +186,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <input type="text" name="house_name_en" class="form-control" value="<?php echo htmlspecialchars($house['house_name_en']); ?>">
                         </div>
                         
+                        <div class="mb-3">
+                            <label class="form-label">ເຈົ້າຂອງ (ລາວ)</label>
+                            <input type="text" name="owner_name_lo" class="form-control" value="<?php echo htmlspecialchars($house['owner_name_lo']); ?>">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">ເຈົ້າຂອງ (ອັງກິດ)</label>
+                            <input type="text" name="owner_name_en" class="form-control" value="<?php echo htmlspecialchars($house['owner_name_en']); ?>">
+                        </div>
                         
                         <div class="mb-3">
                             <label class="form-label">ປີກໍ່ສ້າງ</label>
                             <input type="number" name="construction_year" class="form-control" value="<?php echo $house['construction_year']; ?>">
                         </div>
                         
+                        <div class="mb-3">
+                            <label class="form-label">ສະຖາປັດຕະຍະກຳ (ລາວ)</label>
+                            <input type="text" name="architectural_style_lo" class="form-control" value="<?php echo htmlspecialchars($house['architectural_style_lo']); ?>">
+                        </div>
                         
+                        <div class="mb-3">
+                            <label class="form-label">ສະຖາປັດຕະຍະກຳ (ອັງກິດ)</label>
+                            <input type="text" name="architectural_style_en" class="form-control" value="<?php echo htmlspecialchars($house['architectural_style_en']); ?>">
+                        </div>
                         
                         <!-- <div class="mb-3">
                             <label class="form-label">ສະຖານະ</label>
@@ -223,12 +230,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="mb-3">
                             <label class="form-label">ຮູບພາບຫຼັກ</label>
                             <?php if ($house['image_main'] && file_exists('../uploads/' . $house['image_main'])): ?>
-                                <div class="mb-2 img-wrap" id="currentImageWrap">
+                                <div class="mb-2">
                                     <img src="../uploads/<?php echo $house['image_main']; ?>" class="image-preview" id="currentImage">
-                                    <button type="button" class="img-remove-btn" onclick="removeMainImage()" title="ລຶບຮູບ">&times;</button>
                                 </div>
                             <?php endif; ?>
-                            <input type="hidden" name="remove_image_main" id="remove_image_main" value="0">
                             <input type="file" name="image_main" class="form-control" accept="image/*" id="main_image">
                             <div id="main_preview" class="mt-2"></div>
                             <small class="text-muted">ອັບໂຫຼດຮູບໃໝ່ເພື່ອປ່ຽນແທນຮູບເກົ່າ</small>
@@ -237,51 +242,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
         </div>
-
-        <div class="row">
-            <div class="col-12">
-                <div class="card-custom mb-4">
-                    <div class="card-body">
-                        <h5 class="mb-3"><i class="fas fa-map-marker-alt text-success"></i> ປະເພດ ແລະ ວັດສະດຸ</h5>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">ປະເພດເຮືອນ</label>
-                                <select name="house_type" class="form-control">
-                                    <option value="">-- ເລືອກປະເພດເຮືອນ --</option>
-                                    <?php foreach ([
-                                        'ຫຼັງຄາດ່ຽວ (Single-Pitch Roof)',
-                                        'ຫຼັງຄາດ່ຽວມີເຊຍ (Single-Pitch Roof with Gable)',
-                                        'ຫຼັງຄາດ່ຽວເຮືອນຄົວຂວາງ (Single-Pitch Roof with Detached Kitchen)',
-                                        'ເຮືອນເປັນຫ້ອງແຖວ (Row House)',
-                                        'ອາຄານຫ້ອງແຖວເປັນລະບົບ (Systematic Row House Building)',
-                                        'ເຮືອນແບບປະສົມ (Mixed-Style House)',
-                                    ] as $ht): ?>
-                                        <option value="<?php echo $ht; ?>" <?php echo $house['house_type'] === $ht ? 'selected' : ''; ?>><?php echo $ht; ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">ວັດສະດຸກໍ່ສ້າງ</label>
-                                <select name="building_material" class="form-control">
-                                    <option value="">-- ເລືອກວັດສະດຸ --</option>
-                                    <?php foreach ([
-                                        'ໄມ້ (Bois)',
-                                        'ໄມ້/ຕ໋ອກຊີ (Bois/Torchis)',
-                                        'ໄມ້/ດິນຈີ່ກໍ່ປະທາຍປູນ (Bois/Brique Chaux)',
-                                        'ດິນຈີ່ກໍ່ປະທາຍປູນ (Brique/Chaux)',
-                                        'ດິນຈີ່ກໍ່ປະທາຍປູນ/ຕ໋ອກຊີ (Brique Chaux/Torchis)',
-                                        'ໄມ້/ຕ໋ອກຊີ/ດິນຈີ່ກໍ່ປະທາຍປູນ (Bois/Torchis et Brique Chaux)',
-                                    ] as $bm): ?>
-                                        <option value="<?php echo $bm; ?>" <?php echo $house['building_material'] === $bm ? 'selected' : ''; ?>><?php echo $bm; ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        
         <div class="row">
             <div class="col-12">
                 <div class="card-custom mb-4">
@@ -289,12 +250,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <h5 class="mb-3"><i class="fas fa-history text-success"></i> ຂໍ້ມູນລາຍລະອຽດ</h5>
                         
                         <div class="mb-3">
-                            <label class="form-label">ຂໍ້ມູນເຮືອນ (ລາວ)</label>
+                            <label class="form-label">ຄວາມສຳຄັນທາງປະຫວັດສາດ (ລາວ)</label>
                             <textarea name="historical_significance_lo" class="form-control" rows="3"><?php echo htmlspecialchars($house['historical_significance_lo']); ?></textarea>
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">ຂໍ້ມູນເຮືອນ (ອັງກິດ)</label>
+                            <label class="form-label">ຄວາມສຳຄັນທາງປະຫວັດສາດ (ອັງກິດ)</label>
                             <textarea name="historical_significance_en" class="form-control" rows="3"><?php echo htmlspecialchars($house['historical_significance_en']); ?></textarea>
                         </div>
                         
@@ -391,10 +352,6 @@ function removeRow(btn) {
     btn.closest('.add-img-row').remove();
     rowCount--;
     if (document.getElementById('addRowBtn')) document.getElementById('addRowBtn').disabled = false;
-}
-function removeMainImage() {
-    document.getElementById('currentImageWrap').style.display = 'none';
-    document.getElementById('remove_image_main').value = '1';
 }
 
 // ສະແດງຕົວຢ່າງຮູບກ່ອນອັບ

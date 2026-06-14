@@ -45,9 +45,9 @@ function canAdd() {
     return in_array(getCurrentUserRole(), ['admin', 'staff']);
 }
 
-// ສາມາດຈັດການຜູ້ໃຊ້ (Admin ແລະ Staff)
+// ສາມາດຈັດການຜູ້ໃຊ້ (Admin ເທົ່ານັ້ນ)
 function canManageUsers() {
-    return in_array(getCurrentUserRole(), ['admin', 'staff']);
+    return getCurrentUserRole() === 'admin';
 }
 
 // ສະແດງຊື່ສິດເປັນພາສາລາວ

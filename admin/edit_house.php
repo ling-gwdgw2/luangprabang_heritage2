@@ -28,7 +28,19 @@ $message_type = '';
 $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 $upload_dir = '../uploads/';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_image_id'])) {
+    $del_id = intval($_POST['delete_image_id']);
+    $delRow = mysqli_fetch_assoc(mysqli_query($connect, "SELECT image_path FROM heritage_images WHERE image_id=$del_id AND house_id=$house_id"));
+    if ($delRow) {
+        if ($delRow['image_path'] && file_exists('../uploads/' . $delRow['image_path'])) unlink('../uploads/' . $delRow['image_path']);
+        mysqli_query($connect, "DELETE FROM heritage_images WHERE image_id=$del_id");
+        $imgResult2 = mysqli_query($connect, "SELECT * FROM heritage_images WHERE house_id=$house_id ORDER BY display_order");
+        $images = [];
+        while ($img = mysqli_fetch_assoc($imgResult2)) { $images[] = $img; }
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_image_id'])) {
     $qr_code = isset($_POST['qr_code']) ? mysqli_real_escape_string($connect, $_POST['qr_code']) : $house['qr_code'];
     $house_number = isset($_POST['house_number']) ? mysqli_real_escape_string($connect, $_POST['house_number']) : '';
     $house_name_lo = isset($_POST['house_name_lo']) ? mysqli_real_escape_string($connect, $_POST['house_name_lo']) : '';
@@ -83,14 +95,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         building_material='$building_material'
     WHERE house_id=$house_id";
     
-    if (mysqli_query($connect, $updateQuery)) { 
-        $message = 'ອັບເດດຂໍ້ມູນສຳເລັດ!'; 
-        $message_type = 'success'; 
-    } else { 
-        $message = 'ຜິດພາດ: ' . mysqli_error($connect); 
-        $message_type = 'danger'; 
+    if (mysqli_query($connect, $updateQuery)) {
+        $message = 'ອັບເດດຂໍ້ມູນສຳເລັດ!';
+        $message_type = 'success';
+    } else {
+        $message = 'ຜິດພາດ: ' . mysqli_error($connect);
+        $message_type = 'danger';
     }
-}
+} // end update POST
 ?>
 
 <!DOCTYPE html>
@@ -197,9 +209,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
                         <div class="mb-3">
                             <label class="form-label">ຮູບພາບຫຼັກ</label>
-                            <?php if ($house['image_main'] && file_exists('../uploads/' . $house['image_main'])): ?>
+                            <?php if ($house['image_main']): ?>
                                 <div class="mb-2 img-wrap" id="currentImageWrap">
-                                    <img src="../uploads/<?php echo $house['image_main']; ?>" class="image-preview" id="currentImage">
+                                    <img src="../img.php?f=<?php echo urlencode($house['image_main']); ?>" class="image-preview" id="currentImage">
                                     <button type="button" class="img-remove-btn" onclick="removeMainImage()" title="ລຶບຮູບ">&times;</button>
                                 </div>
                             <?php endif; ?>
@@ -212,7 +224,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
         </div>
-        
+
+        <?php if (!empty($images)): ?>
+        <div class="row">
+            <div class="col-12">
+                <div class="card-custom mb-4">
+                    <div class="card-body">
+                        <h5 class="mb-3"><i class="fas fa-images text-success"></i> ຮູບພາບເພີ່ມເຕີມ</h5>
+                        <div class="d-flex flex-wrap gap-3">
+                            <?php foreach ($images as $img): ?>
+                            <div class="img-wrap text-center" id="imgwrap-<?php echo $img['image_id']; ?>">
+                                <img src="../img.php?f=<?php echo urlencode($img['image_path']); ?>" class="image-preview d-block">
+                                <button type="button" class="img-remove-btn" onclick="deleteAdditionalImage(<?php echo $img['image_id']; ?>)" title="ລຶບ">&times;</button>
+                                <?php if ($img['image_caption_lo']): ?>
+                                    <small class="text-muted d-block mt-1" style="max-width:100px;font-size:0.7rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?php echo htmlspecialchars($img['image_caption_lo']); ?></small>
+                                <?php endif; ?>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <div class="row">
             <div class="col-12">
                 <div class="card-custom mb-4">
@@ -299,6 +334,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <script>
+function deleteAdditionalImage(imageId) {
+    Swal.fire({
+        title: 'ລຶບຮູບນີ້?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'ລຶບ',
+        cancelButtonText: 'ຍົກເລີກ'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'delete_image_id';
+            input.value = imageId;
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
+}
+
 function removeMainImage() {
     document.getElementById('currentImageWrap').style.display = 'none';
     document.getElementById('remove_image_main').value = '1';

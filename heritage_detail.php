@@ -74,6 +74,8 @@
         .dot.active { background: #dfb26a; width: 28px; border-radius: 10px; }
         .fullscreen-btn { position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,0.5); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; transition: all 0.3s; z-index: 10; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; backdrop-filter: blur(2px); }
         .fullscreen-btn:hover { background: #dfb26a; color: #1a472a; transform: scale(1.1); }
+        .slide { position: relative; }
+        .slide-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: 16px 24px; background: linear-gradient(transparent, rgba(0,0,0,0.72)); color: #fff; font-size: 1rem; font-weight: 600; letter-spacing: 0.3px; z-index: 5; }
         
         .thumbnail-gallery { display: flex; gap: 15px; overflow-x: auto; padding: 20px; background: rgba(0,0,0,0.02); border-bottom: 1px solid rgba(0,0,0,0.05); }
         .thumbnail-gallery::-webkit-scrollbar { height: 6px; }
@@ -193,13 +195,18 @@
             const historicalSignificance = isLao ? data.historical_significance_lo : data.historical_significance_en;
             const description = isLao ? data.description_lo : data.description_en;
             
+            function toImageSrc(path) {
+                if (!path) return null;
+                return 'uploads/' + path.replace(/^uploads\//, '');
+            }
+
             allImages = [];
             if (data.image_main && data.image_main !== '') {
-                allImages.push({ src: `uploads/${data.image_main}`, caption: isLao ? 'ຮູບຫຼັກ' : 'Main Image' });
+                allImages.push({ src: toImageSrc(data.image_main), caption: isLao ? 'ຮູບຫຼັກ' : 'Main Image' });
             }
             if (data.images && data.images.length > 0) {
                 data.images.forEach(img => {
-                    allImages.push({ src: `uploads/${img.image_path}`, caption: isLao ? img.image_caption_lo : img.image_caption_en });
+                    allImages.push({ src: toImageSrc(img.image_path), caption: isLao ? img.image_caption_lo : img.image_caption_en });
                 });
             }
             if (allImages.length === 0) {
@@ -211,8 +218,11 @@
                         <div class="main-slider-container" id="mainSlider">`;
             
             for (let i = 0; i < allImages.length; i++) {
+                const cap = allImages[i].caption || '';
                 html += `<div class="slide ${i === 0 ? 'active' : ''}" data-index="${i}">
-                            <img src="${allImages[i].src}" alt="Slide ${i+1}" onclick="openFullscreen()">
+                            <img src="${allImages[i].src}" alt="${cap || 'Slide ' + (i+1)}" onclick="openFullscreen()"
+                                 onerror="if(!this.dataset.retried){this.dataset.retried=1;this.src='img.php?f='+encodeURIComponent(this.src.split('/').pop());}else{this.style.opacity='0.2';}">
+                            ${cap ? `<div class="slide-caption">${escapeHtml(cap)}</div>` : ''}
                          </div>`;
             }
             if (allImages.length > 1) {
@@ -230,15 +240,17 @@
             if (allImages.length > 1) {
                 html += `<div class="thumbnail-gallery" id="thumbnailGallery">`;
                 for (let i = 0; i < allImages.length; i++) {
-                    html += `<img src="${allImages[i].src}" class="thumbnail ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})" data-index="${i}">`;
+                    html += `<img src="${allImages[i].src}" class="thumbnail ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})" data-index="${i}" onerror="if(!this.dataset.retried){this.dataset.retried=1;this.src='img.php?f='+encodeURIComponent(this.src.split('/').pop());}else{this.style.opacity='0.3';}">`;
                 }
                 html += `</div>`;
             }
             
             if (architecturalStyle) html += `<div class="text-center"><span class="style-badge"><i class="fas fa-building"></i> ${escapeHtml(architecturalStyle)}</span></div>`;
+            if (data.house_type) html += `<div class="info-section"><div class="d-flex align-items-center"><div class="info-icon"><i class="fas fa-home"></i></div><div><div class="info-title">${isLao ? 'ປະເພດເຮືອນ' : 'House Type'}</div><div class="info-content">${escapeHtml(data.house_type)}</div></div></div></div>`;
+            if (data.building_material) html += `<div class="info-section"><div class="d-flex align-items-center"><div class="info-icon"><i class="fas fa-cubes"></i></div><div><div class="info-title">${isLao ? 'ວັດສະດຸກໍ່ສ້າງ' : 'Building Material'}</div><div class="info-content">${escapeHtml(data.building_material)}</div></div></div></div>`;
             if (ownerName) html += `<div class="info-section"><div class="d-flex align-items-center"><div class="info-icon"><i class="fas fa-user"></i></div><div><div class="info-title">${isLao ? 'ເຈົ້າຂອງ' : 'Owner'}</div><div class="info-content">${escapeHtml(ownerName)}</div></div></div></div>`;
             if (data.construction_year) html += `<div class="info-section"><div class="d-flex align-items-center"><div class="info-icon"><i class="fas fa-calendar-alt"></i></div><div><div class="info-title">${isLao ? 'ປີກໍ່ສ້າງ' : 'Year Built'}</div><div class="info-content">${data.construction_year} ${isLao ? 'ຄ.ສ.' : 'CE'}</div></div></div></div>`;
-            if (historicalSignificance) html += `<div class="info-section"><div class="d-flex align-items-start"><div class="info-icon"><i class="fas fa-history"></i></div><div><div class="info-title">${isLao ? 'ຄວາມສຳຄັນທາງປະຫວັດສາດ' : 'Historical Significance'}</div><div class="info-content">${escapeHtml(historicalSignificance)}</div></div></div></div>`;
+            if (historicalSignificance) html += `<div class="info-section"><div class="d-flex align-items-start"><div class="info-icon"><i class="fas fa-history"></i></div><div><div class="info-title">${isLao ? 'ຂໍ້ມູນເຮືອນ' : 'Historical Significance'}</div><div class="info-content">${escapeHtml(historicalSignificance)}</div></div></div></div>`;
             if (description) html += `<div class="info-section"><div class="d-flex align-items-start"><div class="info-icon"><i class="fas fa-align-left"></i></div><div><div class="info-title">${isLao ? 'ລາຍລະອຽດ' : 'Description'}</div><div class="info-content">${escapeHtml(description)}</div></div></div></div>`;
             
             if (data.latitude && data.longitude && data.latitude != 0 && data.longitude != 0) {
@@ -300,7 +312,7 @@
         
         function goToSlide(index) {
             if (index === currentSlideIndex) return;
-            
+
             $('.slide').removeClass('active');
             $(`.slide[data-index="${index}"]`).addClass('active');
             $('.dot').removeClass('active');

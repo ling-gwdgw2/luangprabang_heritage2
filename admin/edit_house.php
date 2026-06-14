@@ -161,30 +161,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <input type="text" name="house_name_en" class="form-control" value="<?php echo htmlspecialchars($house['house_name_en']); ?>">
                         </div>
                         
-                        <div class="mb-3">
-                            <label class="form-label">ເຈົ້າຂອງ (ລາວ)</label>
-                            <input type="text" name="owner_name_lo" class="form-control" value="<?php echo htmlspecialchars($house['owner_name_lo']); ?>">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">ເຈົ້າຂອງ (ອັງກິດ)</label>
-                            <input type="text" name="owner_name_en" class="form-control" value="<?php echo htmlspecialchars($house['owner_name_en']); ?>">
-                        </div>
                         
                         <div class="mb-3">
                             <label class="form-label">ປີກໍ່ສ້າງ</label>
                             <input type="number" name="construction_year" class="form-control" value="<?php echo $house['construction_year']; ?>">
                         </div>
                         
-                        <div class="mb-3">
-                            <label class="form-label">ສະຖາປັດຕະຍະກຳ (ລາວ)</label>
-                            <input type="text" name="architectural_style_lo" class="form-control" value="<?php echo htmlspecialchars($house['architectural_style_lo']); ?>">
-                        </div>
                         
-                        <div class="mb-3">
-                            <label class="form-label">ສະຖາປັດຕະຍະກຳ (ອັງກິດ)</label>
-                            <input type="text" name="architectural_style_en" class="form-control" value="<?php echo htmlspecialchars($house['architectural_style_en']); ?>">
-                        </div>
                         
                         <!-- <div class="mb-3">
                             <label class="form-label">ສະຖານະ</label>

@@ -45,9 +45,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $latitude = isset($_POST['latitude']) && $_POST['latitude'] !== '' ? floatval($_POST['latitude']) : 'NULL';
     $longitude = isset($_POST['longitude']) && $_POST['longitude'] !== '' ? floatval($_POST['longitude']) : 'NULL';
     $status = isset($_POST['status']) ? mysqli_real_escape_string($connect, $_POST['status']) : 'active';
-    
+      $house_type = isset($_POST['house_type']) ? mysqli_real_escape_string($connect, $_POST['house_type']) : '';
+    $building_material = isset($_POST['building_material']) ? mysqli_real_escape_string($connect, $_POST['building_material']) : '';
     $image_main = $house['image_main'];
-    if (isset($_FILES['image_main']) && $_FILES['image_main']['error'] === UPLOAD_ERR_OK) {
+   if (!empty($_POST['remove_image_main']) && $_POST['remove_image_main'] == '1') {
+        if ($image_main && file_exists($upload_dir . $image_main)) unlink($upload_dir . $image_main);
+        $image_main = '';
+    } elseif (isset($_FILES['image_main']) && $_FILES['image_main']['error'] === UPLOAD_ERR_OK) {
         $ext = strtolower(pathinfo($_FILES['image_main']['name'], PATHINFO_EXTENSION));
         if (in_array($ext, $allowed)) {
             if ($image_main && file_exists($upload_dir . $image_main)) unlink($upload_dir . $image_main);
@@ -72,8 +76,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         description_en='$description_en', 
         latitude=$latitude, 
         longitude=$longitude, 
-        image_main='$image_main', 
-        status='$status' 
+          image_main='$image_main',
+        status='$status',
+        house_type='$house_type',
+        building_material='$building_material'
     WHERE house_id=$house_id";
     
     if (mysqli_query($connect, $updateQuery)) {
@@ -136,6 +142,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .btn-cancel:hover { background: #5a6268; }
         .form-label { font-weight: bold; color: #1a472a; }
         .image-preview { width: 100px; height: 100px; object-fit: cover; border-radius: 10px; margin: 5px; }
+        .img-wrap { position: relative; display: inline-block; }
+        .img-remove-btn { position: absolute; top: 0; right: 0; background: #dc3545; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 14px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3); transition: background 0.2s; }
+        .img-remove-btn:hover { background: #a71d2a; }
         @media (max-width: 768px) { .sidebar { width: 70px; } .sidebar .nav-link span:not(.nav-icon) { display: none; } .main-content { margin-left: 70px; } }
     </style>
 </head>
@@ -186,31 +195,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <input type="text" name="house_name_en" class="form-control" value="<?php echo htmlspecialchars($house['house_name_en']); ?>">
                         </div>
                         
-                        <div class="mb-3">
-                            <label class="form-label">ເຈົ້າຂອງ (ລາວ)</label>
-                            <input type="text" name="owner_name_lo" class="form-control" value="<?php echo htmlspecialchars($house['owner_name_lo']); ?>">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">ເຈົ້າຂອງ (ອັງກິດ)</label>
-                            <input type="text" name="owner_name_en" class="form-control" value="<?php echo htmlspecialchars($house['owner_name_en']); ?>">
-                        </div>
                         
                         <div class="mb-3">
                             <label class="form-label">ປີກໍ່ສ້າງ</label>
                             <input type="number" name="construction_year" class="form-control" value="<?php echo $house['construction_year']; ?>">
                         </div>
                         
-                        <div class="mb-3">
-                            <label class="form-label">ສະຖາປັດຕະຍະກຳ (ລາວ)</label>
-                            <input type="text" name="architectural_style_lo" class="form-control" value="<?php echo htmlspecialchars($house['architectural_style_lo']); ?>">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">ສະຖາປັດຕະຍະກຳ (ອັງກິດ)</label>
-                            <input type="text" name="architectural_style_en" class="form-control" value="<?php echo htmlspecialchars($house['architectural_style_en']); ?>">
-                        </div>
-                        
+        
                         <!-- <div class="mb-3">
                             <label class="form-label">ສະຖານະ</label>
                             <select name="status" class="form-select">
@@ -230,7 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="mb-3">
                             <label class="form-label">ຮູບພາບຫຼັກ</label>
                             <?php if ($house['image_main'] && file_exists('../uploads/' . $house['image_main'])): ?>
-                                <div class="mb-2">
+                                <div class="mb-2 img-wrap" id="currentImageWrap">
                                     <img src="../uploads/<?php echo $house['image_main']; ?>" class="image-preview" id="currentImage">
                                 </div>
                             <?php endif; ?>

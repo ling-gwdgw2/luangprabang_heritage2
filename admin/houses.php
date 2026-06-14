@@ -122,9 +122,9 @@ $result = mysqli_query($connect, $query);
                         <?php 
                         $count = $offset + 1; 
                         while ($house = mysqli_fetch_assoc($result)) { 
-                            $visitCountQuery = "SELECT COUNT(*) as cnt FROM visit_logs WHERE house_id = " . $house['house_id']; 
-                            $visitCountResult = mysqli_query($connect, $visitCountQuery); 
-                            $visitCount = mysqli_fetch_assoc($visitCountResult)['cnt']; 
+                            // $visitCountQuery = "SELECT COUNT(*) as cnt FROM visit_logs WHERE house_id = " . $house['house_id'];
+                            // $visitCountResult = mysqli_query($connect, $visitCountQuery);
+                            // $visitCount = mysqli_fetch_assoc($visitCountResult)['cnt'];
                         ?>
                         <tr>
                             <td class="fw-bold"><?php echo $count++; ?></td>

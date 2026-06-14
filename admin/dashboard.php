@@ -8,8 +8,8 @@ include_once '../config/database.php';
 include_once 'check_permission.php';
 
 $totalHouses = mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(*) as count FROM heritage_houses"))['count'];
-$totalVisits = mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(*) as count FROM visit_logs"))['count'];
-$todayVisits = mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(*) as count FROM visit_logs WHERE visit_date = CURDATE()"))['count'];
+//$totalVisits = mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(*) as count FROM visit_logs"))['count'];
+//$todayVisits = mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(*) as count FROM visit_logs WHERE visit_date = CURDATE()"))['count'];
 $activeHouses = mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(*) as count FROM heritage_houses WHERE status = 'active'"))['count'];
 $recentHouses = mysqli_query($connect, "SELECT * FROM heritage_houses ORDER BY created_at DESC LIMIT 10");
 ?>
@@ -61,11 +61,13 @@ $recentHouses = mysqli_query($connect, "SELECT * FROM heritage_houses ORDER BY c
         </div>
     </div>
     <div class="row mb-4">
-        <div class="col-md-3 mb-3"><div class="stat-card"><div class="d-flex justify-content-between"><div><div class="stat-number"><?php echo $totalHouses; ?></div><div class="text-muted small">ເຮືອນມໍລະດົກທັງໝົດ</div></div><i class="fas fa-home fa-2x text-success"></i></div></div></div>
-        <div class="col-md-3 mb-3"><div class="stat-card"><div class="d-flex justify-content-between"><div><div class="stat-number"><?php echo $activeHouses; ?></div><div class="text-muted small">ເຮືອນທີ່ເປີດໃຫ້ຊົມ</div></div><i class="fas fa-check-circle fa-2x text-success"></i></div></div></div>
+              <div class="col-md-6 mb-3"><div class="stat-card"><div class="d-flex justify-content-between"><div><div class="stat-number"><?php echo $totalHouses; ?></div><div class="text-muted small">ເຮືອນມໍລະດົກທັງໝົດ</div></div><i class="fas fa-home fa-2x text-success"></i></div></div></div>
+        <div class="col-md-6 mb-3"><div class="stat-card"><div class="d-flex justify-content-between"><div><div class="stat-number"><?php echo $activeHouses; ?></div><div class="text-muted small">ເຮືອນທີ່ເປີດໃຫ້ຊົມ</div></div><i class="fas fa-check-circle fa-2x text-success"></i></div></div></div>
+        <?php /*
         <div class="col-md-3 mb-3"><div class="stat-card"><div class="d-flex justify-content-between"><div><div class="stat-number"><?php echo number_format($totalVisits); ?></div><div class="text-muted small">ຜູ້ເຂົ້າຊົມທັງໝົດ</div></div><i class="fas fa-eye fa-2x text-success"></i></div></div></div>
         <div class="col-md-3 mb-3"><div class="stat-card"><div class="d-flex justify-content-between"><div><div class="stat-number"><?php echo number_format($todayVisits); ?></div><div class="text-muted small">ຜູ້ເຂົ້າຊົມມື້ນີ້</div></div><i class="fas fa-calendar-day fa-2x text-success"></i></div></div></div>
     </div>
+       */ ?>
     <div class="card card-custom">
         <div class="card-header bg-white">
             <h5 class="mb-0"><i class="fas fa-list text-success"></i> ເຮືອນມໍລະດົກລ່າສຸດ</h5>

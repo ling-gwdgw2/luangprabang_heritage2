@@ -28,6 +28,27 @@ if ($connect) {
     )");
     echo "<p style='color:green'>✅ image_store table ready</p>";
 
+    // Auto-import any images already in the uploads/ folder into image_store
+    echo "<h2>ນຳເຂົ້າຮູບພາບຈາກ uploads/...</h2>";
+    $upload_dir = __DIR__ . '/uploads/';
+    $imported = 0;
+    $skipped = 0;
+    if (is_dir($upload_dir)) {
+        foreach (glob($upload_dir . '*') as $filepath) {
+            if (!is_file($filepath)) continue;
+            $fname = basename($filepath);
+            $check = mysqli_fetch_assoc(mysqli_query($connect, "SELECT id FROM image_store WHERE filename='" . mysqli_real_escape_string($connect, $fname) . "'"));
+            if ($check) { $skipped++; continue; }
+            $mime = function_exists('mime_content_type') ? mime_content_type($filepath) : 'image/jpeg';
+            $data = base64_encode(file_get_contents($filepath));
+            $fn_s = mysqli_real_escape_string($connect, $fname);
+            $mime_s = mysqli_real_escape_string($connect, $mime);
+            mysqli_query($connect, "INSERT INTO image_store (filename, image_mime, image_data) VALUES ('$fn_s','$mime_s','$data') ON DUPLICATE KEY UPDATE image_data='$data'");
+            $imported++;
+        }
+    }
+    echo "<p style='color:green'>✅ ນຳເຂົ້າ: <strong>$imported</strong> ຮູບ, ຂ້າມ: <strong>$skipped</strong> (ມີແລ້ວ)</p>";
+
     // Fix visit_logs schema: add missing columns if they don't exist
     echo "<h2>ກວດສອບ visit_logs...</h2>";
     $fixes = [

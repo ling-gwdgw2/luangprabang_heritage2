@@ -49,7 +49,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $building_material = isset($_POST['building_material']) ? mysqli_real_escape_string($connect, $_POST['building_material']) : '';
 
     $image_main = $house['image_main'];
-    if (isset($_FILES['image_main']) && $_FILES['image_main']['error'] === UPLOAD_ERR_OK) {
+    if (!empty($_POST['remove_image_main']) && $_POST['remove_image_main'] == '1') {
+        if ($image_main && file_exists($upload_dir . $image_main)) unlink($upload_dir . $image_main);
+        $image_main = '';
+    } elseif (isset($_FILES['image_main']) && $_FILES['image_main']['error'] === UPLOAD_ERR_OK) {
         $ext = strtolower(pathinfo($_FILES['image_main']['name'], PATHINFO_EXTENSION));
         if (in_array($ext, $allowed)) {
             if ($image_main && file_exists($upload_dir . $image_main)) unlink($upload_dir . $image_main);
@@ -115,6 +118,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .btn-cancel:hover { background: #5a6268; }
         .form-label { font-weight: bold; color: #1a472a; }
         .image-preview { width: 100px; height: 100px; object-fit: cover; border-radius: 10px; margin: 5px; }
+        .img-wrap { position: relative; display: inline-block; }
+        .img-remove-btn { position: absolute; top: 0; right: 0; background: #dc3545; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 14px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3); transition: background 0.2s; }
+        .img-remove-btn:hover { background: #a71d2a; }
         @media (max-width: 768px) { .sidebar { width: 70px; } .sidebar .nav-link span:not(.nav-icon) { display: none; } .main-content { margin-left: 70px; } }
     </style>
 </head>
@@ -192,10 +198,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="mb-3">
                             <label class="form-label">ຮູບພາບຫຼັກ</label>
                             <?php if ($house['image_main'] && file_exists('../uploads/' . $house['image_main'])): ?>
-                                <div class="mb-2">
+                                <div class="mb-2 img-wrap" id="currentImageWrap">
                                     <img src="../uploads/<?php echo $house['image_main']; ?>" class="image-preview" id="currentImage">
+                                    <button type="button" class="img-remove-btn" onclick="removeMainImage()" title="ລຶບຮູບ">&times;</button>
                                 </div>
                             <?php endif; ?>
+                            <input type="hidden" name="remove_image_main" id="remove_image_main" value="0">
                             <input type="file" name="image_main" class="form-control" accept="image/*" id="main_image">
                             <div id="main_preview" class="mt-2"></div>
                             <small class="text-muted">ອັບໂຫຼດຮູບໃໝ່ເພື່ອປ່ຽນແທນຮູບເກົ່າ</small>
@@ -291,6 +299,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <script>
+function removeMainImage() {
+    document.getElementById('currentImageWrap').style.display = 'none';
+    document.getElementById('remove_image_main').value = '1';
+}
+
 // ສະແດງຕົວຢ່າງຮູບກ່ອນອັບ
 document.getElementById('main_image').addEventListener('change', function(e) {
     const preview = document.getElementById('main_preview');

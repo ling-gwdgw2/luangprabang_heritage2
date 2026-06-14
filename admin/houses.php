@@ -114,7 +114,7 @@ $result = mysqli_query($connect, $query);
                             <th style="width: 20%">ຊື່ເຮືອນ (ລາວ)</th>
                             <th style="width: 20%">ຊື່ເຮືອນ (ອັງກິດ)</th>
                             <th style="width: 10%">ສະຖານະ</th>
-                            <th style="width: 10%; display:none">ຜູ້ເຂົ້າຊົມ</th>
+                            <?php // <th style="width: 10%">ຜູ້ເຂົ້າຊົມ</th> ?>
                             <th style="width: 20%">ການຈັດການ</th>
                         </tr>
                     </thead>
@@ -136,7 +136,7 @@ $result = mysqli_query($connect, $query);
                                     <?php echo $house['status'] == 'active' ? 'ເປີດໃຊ້' : 'ປິດໃຊ້'; ?>
                                 </span>
                             </td>
-                            <td><?php echo number_format($visitCount); ?></td>
+                            <?php // echo "<td>" . number_format($visitCount) . "</td>"; ?>
                             <td>
                                 <a href="edit_house.php?id=<?php echo $house['house_id']; ?>" class="btn btn-sm btn-warning me-1" title="ແກ້ໄຂ">
                                     <i class="fas fa-edit"></i>

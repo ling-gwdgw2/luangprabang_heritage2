@@ -45,10 +45,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $latitude = isset($_POST['latitude']) && $_POST['latitude'] !== '' ? floatval($_POST['latitude']) : 'NULL';
     $longitude = isset($_POST['longitude']) && $_POST['longitude'] !== '' ? floatval($_POST['longitude']) : 'NULL';
     $status = isset($_POST['status']) ? mysqli_real_escape_string($connect, $_POST['status']) : 'active';
-      $house_type = isset($_POST['house_type']) ? mysqli_real_escape_string($connect, $_POST['house_type']) : '';
+    $house_type = isset($_POST['house_type']) ? mysqli_real_escape_string($connect, $_POST['house_type']) : '';
     $building_material = isset($_POST['building_material']) ? mysqli_real_escape_string($connect, $_POST['building_material']) : '';
+
     $image_main = $house['image_main'];
-   if (!empty($_POST['remove_image_main']) && $_POST['remove_image_main'] == '1') {
+    if (!empty($_POST['remove_image_main']) && $_POST['remove_image_main'] == '1') {
         if ($image_main && file_exists($upload_dir . $image_main)) unlink($upload_dir . $image_main);
         $image_main = '';
     } elseif (isset($_FILES['image_main']) && $_FILES['image_main']['error'] === UPLOAD_ERR_OK) {
@@ -76,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         description_en='$description_en', 
         latitude=$latitude, 
         longitude=$longitude, 
-          image_main='$image_main',
+        image_main='$image_main',
         status='$status',
         house_type='$house_type',
         building_material='$building_material'
@@ -86,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_FILES['additional_images']) && !empty($_FILES['additional_images']['name'][0])) {
             $cntRes = mysqli_query($connect, "SELECT COUNT(*) as cnt FROM heritage_images WHERE house_id = $house_id");
             $cntRow = mysqli_fetch_assoc($cntRes);
-            $slots = max(0, 4 - intval($cntRow['cnt']));
+            $slots = max(0, 3 - intval($cntRow['cnt']));
             if ($slots > 0) {
                 $orderRes = mysqli_query($connect, "SELECT COALESCE(MAX(display_order), -1) + 1 as next_order FROM heritage_images WHERE house_id = $house_id");
                 $orderRow = mysqli_fetch_assoc($orderRes);
@@ -111,8 +112,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = 'ອັບເດດຂໍ້ມູນສຳເລັດ!';
         $message_type = 'success';
     } else {
-        $message = 'ຜິດພາດ: ' . mysqli_error($connect); 
-        $message_type = 'danger'; 
+        $message = 'ຜິດພາດ: ' . mysqli_error($connect);
+        $message_type = 'danger';
     }
 }
 ?>
@@ -201,7 +202,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <input type="number" name="construction_year" class="form-control" value="<?php echo $house['construction_year']; ?>">
                         </div>
                         
-        
+                        
+                        
                         <!-- <div class="mb-3">
                             <label class="form-label">ສະຖານະ</label>
                             <select name="status" class="form-select">
@@ -223,8 +225,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <?php if ($house['image_main'] && file_exists('../uploads/' . $house['image_main'])): ?>
                                 <div class="mb-2 img-wrap" id="currentImageWrap">
                                     <img src="../uploads/<?php echo $house['image_main']; ?>" class="image-preview" id="currentImage">
+                                    <button type="button" class="img-remove-btn" onclick="removeMainImage()" title="ລຶບຮູບ">&times;</button>
                                 </div>
                             <?php endif; ?>
+                            <input type="hidden" name="remove_image_main" id="remove_image_main" value="0">
                             <input type="file" name="image_main" class="form-control" accept="image/*" id="main_image">
                             <div id="main_preview" class="mt-2"></div>
                             <small class="text-muted">ອັບໂຫຼດຮູບໃໝ່ເພື່ອປ່ຽນແທນຮູບເກົ່າ</small>
@@ -233,7 +237,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
         </div>
-        
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card-custom mb-4">
+                    <div class="card-body">
+                        <h5 class="mb-3"><i class="fas fa-map-marker-alt text-success"></i> ປະເພດ ແລະ ວັດສະດຸ</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">ປະເພດເຮືອນ</label>
+                                <select name="house_type" class="form-control">
+                                    <option value="">-- ເລືອກປະເພດເຮືອນ --</option>
+                                    <?php foreach ([
+                                        'ຫຼັງຄາດ່ຽວ (Single-Pitch Roof)',
+                                        'ຫຼັງຄາດ່ຽວມີເຊຍ (Single-Pitch Roof with Gable)',
+                                        'ຫຼັງຄາດ່ຽວເຮືອນຄົວຂວາງ (Single-Pitch Roof with Detached Kitchen)',
+                                        'ເຮືອນເປັນຫ້ອງແຖວ (Row House)',
+                                        'ອາຄານຫ້ອງແຖວເປັນລະບົບ (Systematic Row House Building)',
+                                        'ເຮືອນແບບປະສົມ (Mixed-Style House)',
+                                    ] as $ht): ?>
+                                        <option value="<?php echo $ht; ?>" <?php echo $house['house_type'] === $ht ? 'selected' : ''; ?>><?php echo $ht; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">ວັດສະດຸກໍ່ສ້າງ</label>
+                                <select name="building_material" class="form-control">
+                                    <option value="">-- ເລືອກວັດສະດຸ --</option>
+                                    <?php foreach ([
+                                        'ໄມ້ (Bois)',
+                                        'ໄມ້/ຕ໋ອກຊີ (Bois/Torchis)',
+                                        'ໄມ້/ດິນຈີ່ກໍ່ປະທາຍປູນ (Bois/Brique Chaux)',
+                                        'ດິນຈີ່ກໍ່ປະທາຍປູນ (Brique/Chaux)',
+                                        'ດິນຈີ່ກໍ່ປະທາຍປູນ/ຕ໋ອກຊີ (Brique Chaux/Torchis)',
+                                        'ໄມ້/ຕ໋ອກຊີ/ດິນຈີ່ກໍ່ປະທາຍປູນ (Bois/Torchis et Brique Chaux)',
+                                    ] as $bm): ?>
+                                        <option value="<?php echo $bm; ?>" <?php echo $house['building_material'] === $bm ? 'selected' : ''; ?>><?php echo $bm; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-12">
                 <div class="card-custom mb-4">
@@ -241,12 +289,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <h5 class="mb-3"><i class="fas fa-history text-success"></i> ຂໍ້ມູນລາຍລະອຽດ</h5>
                         
                         <div class="mb-3">
-                            <label class="form-label">ຄວາມສຳຄັນທາງປະຫວັດສາດ (ລາວ)</label>
+                            <label class="form-label">ຂໍ້ມູນເຮືອນ (ລາວ)</label>
                             <textarea name="historical_significance_lo" class="form-control" rows="3"><?php echo htmlspecialchars($house['historical_significance_lo']); ?></textarea>
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">ຄວາມສຳຄັນທາງປະຫວັດສາດ (ອັງກິດ)</label>
+                            <label class="form-label">ຂໍ້ມູນເຮືອນ (ອັງກິດ)</label>
                             <textarea name="historical_significance_en" class="form-control" rows="3"><?php echo htmlspecialchars($house['historical_significance_en']); ?></textarea>
                         </div>
                         
@@ -268,7 +316,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="col-12">
                 <div class="card-custom mb-4">
                     <div class="card-body">
-                        <h5 class="mb-3"><i class="fas fa-images text-success"></i> ຮູບພາບເພີ່ມເຕີມ <small class="text-muted">(ສູງສຸດ 4 ຮູບ)</small></h5>
+                        <h5 class="mb-3"><i class="fas fa-images text-success"></i> ຮູບພາບເພີ່ມເຕີມ <small class="text-muted">(ສູງສຸດ 3 ຮູບ)</small></h5>
 
                         <?php if (!empty($images)): ?>
                         <div class="mb-3">
@@ -284,7 +332,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <?php endif; ?>
 
-                        <?php $slots = max(0, 4 - count($images)); ?>
+                        <?php $slots = max(0, 3 - count($images)); ?>
                         <?php if ($slots > 0): ?>
                         <div>
                             <label class="form-label">ເພີ່ມຮູບໃໝ່ (ໄດ້ອີກ <?php echo $slots; ?> ຮູບ)</label>
@@ -303,7 +351,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <?php endif; ?>
                         </div>
                         <?php else: ?>
-                        <p class="text-muted mb-0"><i class="fas fa-info-circle"></i> ຮູບເພີ່ມເຕີມເຕັມແລ້ວ (4/4)</p>
+                        <p class="text-muted mb-0"><i class="fas fa-info-circle"></i> ຮູບເພີ່ມເຕີມເຕັມແລ້ວ (3/3)</p>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -343,6 +391,10 @@ function removeRow(btn) {
     btn.closest('.add-img-row').remove();
     rowCount--;
     if (document.getElementById('addRowBtn')) document.getElementById('addRowBtn').disabled = false;
+}
+function removeMainImage() {
+    document.getElementById('currentImageWrap').style.display = 'none';
+    document.getElementById('remove_image_main').value = '1';
 }
 
 // ສະແດງຕົວຢ່າງຮູບກ່ອນອັບ

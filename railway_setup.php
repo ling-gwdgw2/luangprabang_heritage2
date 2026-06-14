@@ -73,17 +73,17 @@ if ($connect) {
     CREATE TABLE IF NOT EXISTS visit_logs (
         log_id INT AUTO_INCREMENT PRIMARY KEY,
         house_id INT,
-        qr_code VARCHAR(50),
-        visit_date DATE,
         visitor_ip VARCHAR(45),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        visitor_device VARCHAR(255),
+        visit_date DATE,
+        visit_time TIME,
         FOREIGN KEY (house_id) REFERENCES heritage_houses(house_id) ON DELETE SET NULL
     );
     ";
-    
+
     $queries = explode(';', $sql_tables);
     $success = true;
-    
+
     foreach ($queries as $query) {
         $query = trim($query);
         if (!empty($query)) {
@@ -95,6 +95,16 @@ if ($connect) {
             }
         }
     }
+
+    // Add missing columns to visit_logs if the table already existed without them
+    $alter_queries = [
+        "ALTER TABLE visit_logs ADD COLUMN IF NOT EXISTS visitor_device VARCHAR(255)",
+        "ALTER TABLE visit_logs ADD COLUMN IF NOT EXISTS visit_time TIME",
+    ];
+    foreach ($alter_queries as $q) {
+        mysqli_query($connect, $q);
+    }
+    echo "<p style='color: green'>✅ visit_logs columns verified</p>";
     
     // ສ້າງຜູ້ໃຊ້ admin
     if ($success) {

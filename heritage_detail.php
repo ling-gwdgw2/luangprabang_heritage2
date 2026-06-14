@@ -201,8 +201,7 @@
             
             function toImageSrc(path) {
                 if (!path) return null;
-                const clean = path.replace(/^uploads\//, '');
-                return `img.php?f=${encodeURIComponent(clean)}`;
+                return 'uploads/' + path.replace(/^uploads\//, '');
             }
 
             allImages = [];
@@ -231,7 +230,7 @@
                             </div>
                             <img src="${allImages[i].src}" alt="${cap || 'Slide ' + (i+1)}" onclick="openFullscreen()"
                                  onload="document.getElementById('broken-${i}').style.display='none'; this.style.display='block';"
-                                 onerror="document.getElementById('broken-${i}').style.display='flex'; this.style.display='none';"
+                                 onerror="if(!this.dataset.retried){this.dataset.retried=1;this.src='img.php?f='+encodeURIComponent(this.src.split('/').pop());}else{document.getElementById('broken-${i}').style.display='flex';this.style.display='none';}"
                                  style="display:none;">
                          </div>`;
             }
@@ -251,7 +250,7 @@
             if (allImages.length > 1) {
                 html += `<div class="thumbnail-gallery" id="thumbnailGallery">`;
                 for (let i = 0; i < allImages.length; i++) {
-                    html += `<img src="${allImages[i].src}" class="thumbnail ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})" data-index="${i}">`;
+                    html += `<img src="${allImages[i].src}" class="thumbnail ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})" data-index="${i}" onerror="if(!this.dataset.retried){this.dataset.retried=1;this.src='img.php?f='+encodeURIComponent(this.src.split('/').pop());}else{this.style.opacity='0.3';}">`;
                 }
                 html += `</div>`;
             }

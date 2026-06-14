@@ -74,6 +74,7 @@
         .dot.active { background: #dfb26a; width: 28px; border-radius: 10px; }
         .fullscreen-btn { position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,0.5); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; transition: all 0.3s; z-index: 10; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; backdrop-filter: blur(2px); }
         .fullscreen-btn:hover { background: #dfb26a; color: #1a472a; transform: scale(1.1); }
+        .slide-caption-bar { text-align: center; padding: 12px 24px; background: linear-gradient(135deg, #1a472a, #2d6a4f); color: #fff; font-size: 1rem; font-weight: 600; letter-spacing: 0.3px; min-height: 44px; transition: opacity 0.3s; }
         
         .thumbnail-gallery { display: flex; gap: 15px; overflow-x: auto; padding: 20px; background: rgba(0,0,0,0.02); border-bottom: 1px solid rgba(0,0,0,0.05); }
         .thumbnail-gallery::-webkit-scrollbar { height: 6px; }
@@ -231,7 +232,8 @@
                 html += `</div>`;
             }
             html += `<button class="fullscreen-btn" onclick="openFullscreen()"><i class="fas fa-expand"></i></button>
-                    </div>`;
+                    </div>
+                    <div class="slide-caption-bar" id="slideCaptionBar">${escapeHtml(allImages[0].caption || '')}</div>`;
             
             if (allImages.length > 1) {
                 html += `<div class="thumbnail-gallery" id="thumbnailGallery">`;
@@ -308,7 +310,7 @@
         
         function goToSlide(index) {
             if (index === currentSlideIndex) return;
-            
+
             $('.slide').removeClass('active');
             $(`.slide[data-index="${index}"]`).addClass('active');
             $('.dot').removeClass('active');
@@ -316,6 +318,9 @@
             $('.thumbnail').removeClass('active');
             $('.thumbnail').eq(index).addClass('active');
             currentSlideIndex = index;
+
+            const captionBar = document.getElementById('slideCaptionBar');
+            if (captionBar) captionBar.textContent = allImages[index].caption || '';
         }
         
         function startAutoSlide() {

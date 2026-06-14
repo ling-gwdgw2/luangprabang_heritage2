@@ -219,17 +219,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <label>ປະເພດເຮືອນ</label>
                         <select name="house_type" class="form-control">
                             <option value="">-- ເລືອກປະເພດເຮືອນ --</option>
-                            <option value="ຫຼັງຄາດ່ຽວ">ຫຼັງຄາດ່ຽວ</option>
                             <option value="ຫຼັງຄາດ່ຽວ (Single-Pitch Roof)">ຫຼັງຄາດ່ຽວ (Single-Pitch Roof)</option>
-                            <option value="ຫຼັງຄາດ່ຽວມີເຊຍ">ຫຼັງຄາດ່ຽວມີເຊຍ</option>
                             <option value="ຫຼັງຄາດ່ຽວມີເຊຍ (Single-Pitch Roof with Gable)">ຫຼັງຄາດ່ຽວມີເຊຍ (Single-Pitch Roof with Gable)</option>
-                            <option value="ຫຼັງຄາດ່ຽວເຮືອນຄົວຂວາງ">ຫຼັງຄາດ່ຽວເຮືອນຄົວຂວາງ</option>
                             <option value="ຫຼັງຄາດ່ຽວເຮືອນຄົວຂວາງ (Single-Pitch Roof with Detached Kitchen)">ຫຼັງຄາດ່ຽວເຮືອນຄົວຂວາງ (Single-Pitch Roof with Detached Kitchen)</option>
-                            <option value="ເຮືອນເປັນຫ້ອງແຖວ">ເຮືອນເປັນຫ້ອງແຖວ</option>
                             <option value="ເຮືອນເປັນຫ້ອງແຖວ (Row House)">ເຮືອນເປັນຫ້ອງແຖວ (Row House)</option>
-                            <option value="ອາຄານຫ້ອງແຖວເປັນລະບົບ">ອາຄານຫ້ອງແຖວເປັນລະບົບ</option>
                             <option value="ອາຄານຫ້ອງແຖວເປັນລະບົບ (Systematic Row House Building)">ອາຄານຫ້ອງແຖວເປັນລະບົບ (Systematic Row House Building)</option>
-                            <option value="ເຮືອນແບບປະສົມ">ເຮືອນແບບປະສົມ</option>
                             <option value="ເຮືອນແບບປະສົມ (Mixed-Style House)">ເຮືອນແບບປະສົມ (Mixed-Style House)</option>
                         </select>
                     </div>

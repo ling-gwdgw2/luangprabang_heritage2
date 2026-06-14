@@ -45,7 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $latitude = isset($_POST['latitude']) && $_POST['latitude'] !== '' ? floatval($_POST['latitude']) : 'NULL';
     $longitude = isset($_POST['longitude']) && $_POST['longitude'] !== '' ? floatval($_POST['longitude']) : 'NULL';
     $status = isset($_POST['status']) ? mysqli_real_escape_string($connect, $_POST['status']) : 'active';
-    
+    $house_type = isset($_POST['house_type']) ? mysqli_real_escape_string($connect, $_POST['house_type']) : '';
+    $building_material = isset($_POST['building_material']) ? mysqli_real_escape_string($connect, $_POST['building_material']) : '';
+
     $image_main = $house['image_main'];
     if (isset($_FILES['image_main']) && $_FILES['image_main']['error'] === UPLOAD_ERR_OK) {
         $ext = strtolower(pathinfo($_FILES['image_main']['name'], PATHINFO_EXTENSION));
@@ -72,8 +74,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         description_en='$description_en', 
         latitude=$latitude, 
         longitude=$longitude, 
-        image_main='$image_main', 
-        status='$status' 
+        image_main='$image_main',
+        status='$status',
+        house_type='$house_type',
+        building_material='$building_material'
     WHERE house_id=$house_id";
     
     if (mysqli_query($connect, $updateQuery)) { 
@@ -201,6 +205,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
         
+        <div class="row">
+            <div class="col-12">
+                <div class="card-custom mb-4">
+                    <div class="card-body">
+                        <h5 class="mb-3"><i class="fas fa-map-marker-alt text-success"></i> ປະເພດ ແລະ ວັດສະດຸ</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">ປະເພດເຮືອນ</label>
+                                <select name="house_type" class="form-control">
+                                    <option value="">-- ເລືອກປະເພດເຮືອນ --</option>
+                                    <?php foreach (['ຫຼັງຄາດ່ຽວ','ຫຼັງຄາດ່ຽວມີເຊຍ','ຫຼັງຄາດ່ຽວເຮືອນຄົວຂວາງ','ເຮືອນເປັນຫ້ອງແຖວ','ອາຄານຫ້ອງແຖວເປັນລະບົບ','ເຮືອນແບບປະສົມ'] as $ht): ?>
+                                        <option value="<?php echo $ht; ?>" <?php echo $house['house_type'] === $ht ? 'selected' : ''; ?>><?php echo $ht; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">ວັດສະດຸກໍ່ສ້າງ</label>
+                                <select name="building_material" class="form-control">
+                                    <option value="">-- ເລືອກວັດສະດຸ --</option>
+                                    <?php foreach (['ໄມ້','ໄມ້/ຕ໋ອກຊີ','ໄມ້/ດິນຈີ່ກໍ່ປະທາຍປູນ','ດິນຈີ່ກໍ່ປະທາຍປູນ','ດິນຈີ່ກໍ່ປະທາຍປູນ/ຕ໋ອກຊີ','ໄມ້/ຕ໋ອກຊີ/ດິນຈີ່ກໍ່ປະທາຍປູນ'] as $bm): ?>
+                                        <option value="<?php echo $bm; ?>" <?php echo $house['building_material'] === $bm ? 'selected' : ''; ?>><?php echo $bm; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-12">
                 <div class="card-custom mb-4">

@@ -1,4 +1,5 @@
 # Safe ASCII script with dynamic UTF8 base64-decoded messages
+Set-Location $PSScriptRoot
 Add-Type -AssemblyName PresentationFramework, System.Xaml, WindowsBase
 
 function Do-Events {

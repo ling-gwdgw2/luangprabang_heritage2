@@ -1,4 +1,5 @@
 # Safe ASCII script with dynamic UTF8 base64-decoded messages
+Set-Location $PSScriptRoot
 Add-Type -AssemblyName PresentationFramework, System.Xaml, WindowsBase
 
 function Do-Events {
@@ -296,6 +297,10 @@ function Run-Deploy {
     $textStep3.Foreground = [System.Windows.Media.Brushes]::White
     Set-Status 55 $msg.step3_run
     Append-Log $msg.log_push_start
+    
+    # Auto pull to prevent push rejection
+    Append-Log "[Git] Pulling latest updates from GitHub (git pull --no-edit origin main)..."
+    git pull --no-edit origin main 2>&1 | ForEach-Object { Append-Log $_.ToString(); Do-Events }
     
     # Capture push output line-by-line
     $gitPushFailed = $false

@@ -74,6 +74,8 @@
         .dot.active { background: #dfb26a; width: 28px; border-radius: 10px; }
         .fullscreen-btn { position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,0.5); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; transition: all 0.3s; z-index: 10; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; backdrop-filter: blur(2px); }
         .fullscreen-btn:hover { background: #dfb26a; color: #1a472a; transform: scale(1.1); }
+        .slide { position: relative; }
+        .slide-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: 16px 24px; background: linear-gradient(transparent, rgba(0,0,0,0.72)); color: #fff; font-size: 1rem; font-weight: 600; letter-spacing: 0.3px; z-index: 5; }
         
         .thumbnail-gallery { display: flex; gap: 15px; overflow-x: auto; padding: 20px; background: rgba(0,0,0,0.02); border-bottom: 1px solid rgba(0,0,0,0.05); }
         .thumbnail-gallery::-webkit-scrollbar { height: 6px; }
@@ -103,6 +105,21 @@
         .share-btn:hover { transform: translateY(-4px) scale(1.05); filter: brightness(1.05); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .back-button { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #d4a373, #b5835a); color: white; padding: 14px 40px; border-radius: 50px; text-decoration: none; font-weight: bold; box-shadow: 0 8px 25px rgba(212,163,115,0.4); transition: all 0.3s; margin: 30px 0; }
         .back-button:hover { background: linear-gradient(135deg, #b5835a, #996e49); color: white; transform: translateX(-5px); box-shadow: 0 12px 35px rgba(212,163,115,0.6); }
+        .btn-lang {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+            border-radius: 50px;
+            padding: 10px 22px;
+            font-weight: bold;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            transition: all 0.3s;
+        }
+        .btn-lang:hover { transform: scale(1.05); background: white; box-shadow: 0 12px 40px rgba(0,0,0,0.2); }
         
         .loading-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 450px; }
         .loading-spinner { width: 65px; height: 65px; border: 5px solid rgba(255,255,255,0.1); border-top-color: #dfb26a; border-radius: 50%; animation: spin 1s linear infinite; }
@@ -118,8 +135,10 @@
     </style>
 </head>
 <body>
+    <button class="btn-lang" onclick="toggleLanguage()"><i class="fas fa-globe"></i> <span id="lang-text">English</span></button>
+
     <div class="container py-4">
-        <div id="detail-content" class="fade-in-up"><div class="loading-container"><div class="loading-spinner"></div><p class="mt-3 text-muted">ກຳລັງໂຫຼດຂໍ້ມູນ...</p></div></div>
+        <div id="detail-content" class="fade-in-up"><div class="loading-container"><div class="loading-spinner"></div><p class="mt-3 text-muted" id="loading-text">ກຳລັງໂຫຼດຂໍ້ມູນ...</p></div></div>
         <div class="text-center"><a href="index.php" class="back-button" id="back-btn"><i class="fas fa-arrow-left"></i> <span id="back-text">ກັບຄືນ</span></a></div>
     </div>
     
@@ -137,11 +156,22 @@
         }
         qrId = extractIdFromUrl(qrId);
         
+        function toggleLanguage() {
+            const newLang = lang === 'lo' ? 'en' : 'lo';
+            window.location.href = `heritage_detail.php?id=${encodeURIComponent(qrId)}&lang=${newLang}`;
+        }
+        
+        function updateLangButton() {
+            $('#lang-text').text(lang === 'lo' ? 'English' : 'ພາສາລາວ');
+            $('#loading-text').text(lang === 'lo' ? 'ກຳລັງໂຫຼດຂໍ້ມູນ...' : 'Loading...');
+            $('#back-text').text(lang === 'lo' ? 'ກັບຄືນ' : 'Back');
+        }
+        
         let currentSlideIndex = 0;
         let allImages = [];
         let slideInterval;
         
-        $(document).ready(function() { loadHeritageDetail(); $('#back-text').text(lang === 'lo' ? 'ກັບຄືນ' : 'Back'); });
+        $(document).ready(function() { updateLangButton(); loadHeritageDetail(); });
         
         function loadHeritageDetail() {
             $.ajax({
@@ -165,26 +195,34 @@
             const historicalSignificance = isLao ? data.historical_significance_lo : data.historical_significance_en;
             const description = isLao ? data.description_lo : data.description_en;
             
+            function toImageSrc(path) {
+                if (!path) return null;
+                return 'uploads/' + path.replace(/^uploads\//, '');
+            }
+
             allImages = [];
             if (data.image_main && data.image_main !== '') {
-                allImages.push({ src: `uploads/${data.image_main}`, caption: isLao ? 'ຮູບຫຼັກ' : 'Main Image' });
+                allImages.push({ src: toImageSrc(data.image_main), caption: isLao ? 'ຮູບຫຼັກ' : 'Main Image' });
             }
             if (data.images && data.images.length > 0) {
                 data.images.forEach(img => {
-                    allImages.push({ src: `uploads/${img.image_path}`, caption: isLao ? img.image_caption_lo : img.image_caption_en });
+                    allImages.push({ src: toImageSrc(img.image_path), caption: isLao ? img.image_caption_lo : img.image_caption_en });
                 });
             }
             if (allImages.length === 0) {
                 allImages.push({ src: 'https://placehold.co/800x500/2d6a4f/white?text=ມໍລະດົກຫຼວງພະບາງ', caption: '' });
             }
             
-            let html = `<div class="hero-section"><h1>${escapeHtml(houseName || data.house_number || 'ເຮືອນມໍລະດົກຫຼວງພະບາງ')}</h1>${data.house_number ? `<p class="subtitle"><i class="fas fa-map-pin"></i> ເລກທີ່ ${data.house_number}</p>` : ''}<div class="qr-badge"><i class="fas fa-qrcode"></i> ${data.qr_code}</div></div>
+            let html = `<div class="hero-section"><h1>${escapeHtml(houseName || data.house_number || (isLao ? 'ເຮືອນມໍລະດົກຫຼວງພະບາງ' : 'Luang Prabang Heritage House'))}</h1>${data.house_number ? `<p class="subtitle"><i class="fas fa-map-pin"></i> ${isLao ? 'ເລກທີ່' : 'No.'} ${data.house_number}</p>` : ''}<div class="qr-badge"><i class="fas fa-qrcode"></i> ${data.qr_code}</div></div>
                         <div class="heritage-card">
                         <div class="main-slider-container" id="mainSlider">`;
             
             for (let i = 0; i < allImages.length; i++) {
+                const cap = allImages[i].caption || '';
                 html += `<div class="slide ${i === 0 ? 'active' : ''}" data-index="${i}">
-                            <img src="${allImages[i].src}" alt="Slide ${i+1}" onclick="openFullscreen()">
+                            <img src="${allImages[i].src}" alt="${cap || 'Slide ' + (i+1)}" onclick="openFullscreen()"
+                                 onerror="if(!this.dataset.retried){this.dataset.retried=1;this.src='img.php?f='+encodeURIComponent(this.src.split('/').pop());}else{this.style.opacity='0.2';}">
+                            ${cap ? `<div class="slide-caption">${escapeHtml(cap)}</div>` : ''}
                          </div>`;
             }
             if (allImages.length > 1) {
@@ -202,15 +240,17 @@
             if (allImages.length > 1) {
                 html += `<div class="thumbnail-gallery" id="thumbnailGallery">`;
                 for (let i = 0; i < allImages.length; i++) {
-                    html += `<img src="${allImages[i].src}" class="thumbnail ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})" data-index="${i}">`;
+                    html += `<img src="${allImages[i].src}" class="thumbnail ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})" data-index="${i}" onerror="if(!this.dataset.retried){this.dataset.retried=1;this.src='img.php?f='+encodeURIComponent(this.src.split('/').pop());}else{this.style.opacity='0.3';}">`;
                 }
                 html += `</div>`;
             }
             
             if (architecturalStyle) html += `<div class="text-center"><span class="style-badge"><i class="fas fa-building"></i> ${escapeHtml(architecturalStyle)}</span></div>`;
+            if (data.house_type) html += `<div class="info-section"><div class="d-flex align-items-center"><div class="info-icon"><i class="fas fa-home"></i></div><div><div class="info-title">${isLao ? 'ປະເພດເຮືອນ' : 'House Type'}</div><div class="info-content">${escapeHtml(data.house_type)}</div></div></div></div>`;
+            if (data.building_material) html += `<div class="info-section"><div class="d-flex align-items-center"><div class="info-icon"><i class="fas fa-cubes"></i></div><div><div class="info-title">${isLao ? 'ວັດສະດຸກໍ່ສ້າງ' : 'Building Material'}</div><div class="info-content">${escapeHtml(data.building_material)}</div></div></div></div>`;
             if (ownerName) html += `<div class="info-section"><div class="d-flex align-items-center"><div class="info-icon"><i class="fas fa-user"></i></div><div><div class="info-title">${isLao ? 'ເຈົ້າຂອງ' : 'Owner'}</div><div class="info-content">${escapeHtml(ownerName)}</div></div></div></div>`;
             if (data.construction_year) html += `<div class="info-section"><div class="d-flex align-items-center"><div class="info-icon"><i class="fas fa-calendar-alt"></i></div><div><div class="info-title">${isLao ? 'ປີກໍ່ສ້າງ' : 'Year Built'}</div><div class="info-content">${data.construction_year} ${isLao ? 'ຄ.ສ.' : 'CE'}</div></div></div></div>`;
-            if (historicalSignificance) html += `<div class="info-section"><div class="d-flex align-items-start"><div class="info-icon"><i class="fas fa-history"></i></div><div><div class="info-title">${isLao ? 'ຄວາມສຳຄັນທາງປະຫວັດສາດ' : 'Historical Significance'}</div><div class="info-content">${escapeHtml(historicalSignificance)}</div></div></div></div>`;
+            if (historicalSignificance) html += `<div class="info-section"><div class="d-flex align-items-start"><div class="info-icon"><i class="fas fa-history"></i></div><div><div class="info-title">${isLao ? 'ຂໍ້ມູນເຮືອນ' : 'Historical Significance'}</div><div class="info-content">${escapeHtml(historicalSignificance)}</div></div></div></div>`;
             if (description) html += `<div class="info-section"><div class="d-flex align-items-start"><div class="info-icon"><i class="fas fa-align-left"></i></div><div><div class="info-title">${isLao ? 'ລາຍລະອຽດ' : 'Description'}</div><div class="info-content">${escapeHtml(description)}</div></div></div></div>`;
             
             if (data.latitude && data.longitude && data.latitude != 0 && data.longitude != 0) {
@@ -248,13 +288,13 @@
                 }, 300);
             }
             
-            html += `<div class="share-section"><div class="info-title mb-3"><i class="fas fa-share-alt"></i> ແບ່ງປັນ</div>
+            html += `<div class="share-section"><div class="info-title mb-3"><i class="fas fa-share-alt"></i> ${isLao ? 'ແບ່ງປັນ' : 'Share'}</div>
                    
                     <a href="#" class="share-btn copy" onclick="copyToClipboard(); return false;"><i class="fas fa-link"></i></a>
                     </div></div>`;
             
             $('#detail-content').html(html);
-            document.title = `${houseName || 'ມໍລະດົກ'} - ມໍລະດົກຫຼວງພະບາງ`;
+            document.title = `${houseName || (isLao ? 'ມໍລະດົກ' : 'Heritage')} - ${isLao ? 'ມໍລະດົກຫຼວງພະບາງ' : 'Luang Prabang Heritage'}`;
             
             if (allImages.length > 1) {
                 startAutoSlide();
@@ -272,7 +312,7 @@
         
         function goToSlide(index) {
             if (index === currentSlideIndex) return;
-            
+
             $('.slide').removeClass('active');
             $(`.slide[data-index="${index}"]`).addClass('active');
             $('.dot').removeClass('active');

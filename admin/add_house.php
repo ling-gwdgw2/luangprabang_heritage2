@@ -62,6 +62,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $new_filename = time() . '_' . uniqid() . '.' . $ext;
                 if (move_uploaded_file($_FILES['image_main']['tmp_name'], $upload_dir . $new_filename)) {
                     $image_main = $new_filename;
+                    $img_data = base64_encode(file_get_contents($upload_dir . $new_filename));
+                    $img_mime = function_exists('mime_content_type') ? mime_content_type($upload_dir . $new_filename) : 'image/' . $ext;
+                    $stmt = mysqli_prepare($connect, "INSERT INTO image_store (filename, image_mime, image_data) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE image_data=VALUES(image_data)");
+                    if ($stmt) {
+                        mysqli_stmt_bind_param($stmt, 'sss', $new_filename, $img_mime, $img_data);
+                        mysqli_stmt_execute($stmt);
+                        mysqli_stmt_close($stmt);
+                    }
                 }
             }
         }
@@ -97,6 +105,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $cap_lo = isset($_POST['image_caption_lo'][$i]) ? mysqli_real_escape_string($connect, $_POST['image_caption_lo'][$i]) : '';
                                 $cap_en = isset($_POST['image_caption_en'][$i]) ? mysqli_real_escape_string($connect, $_POST['image_caption_en'][$i]) : '';
                                 mysqli_query($connect, "INSERT INTO heritage_images (house_id, image_path, image_caption_lo, image_caption_en, display_order) VALUES ($house_id, '$new_filename', '$cap_lo', '$cap_en', $i)");
+                                $img_data = base64_encode(file_get_contents($upload_dir . $new_filename));
+                                $img_mime = function_exists('mime_content_type') ? mime_content_type($upload_dir . $new_filename) : 'image/' . $ext;
+                                $stmt2 = mysqli_prepare($connect, "INSERT INTO image_store (filename, image_mime, image_data) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE image_data=VALUES(image_data)");
+                                if ($stmt2) {
+                                    mysqli_stmt_bind_param($stmt2, 'sss', $new_filename, $img_mime, $img_data);
+                                    mysqli_stmt_execute($stmt2);
+                                    mysqli_stmt_close($stmt2);
+                                }
                             }
                         }
                     }
@@ -182,7 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <h5 class="mb-3"><i class="fas fa-info-circle text-success"></i> ຂໍ້ມູນທົ່ວໄປ</h5>
                     
                     <div class="mb-3">
-                        <label class="required">QR Code</label>
+                        <label class="required">ລະຫັດເຮືອນ</label>
                         <input type="text" name="qr_code" id="qr_code" class="form-control" required placeholder="ຕົວຢ່າງ: LP_H001">
                         <small class="text-muted">ຕົວຢ່າງ: LP_H001, LP_H002, ...</small>
                     </div>
@@ -208,28 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <input type="number" name="construction_year" class="form-control" min="1000" max="2025">
                         </div>
                     </div>
-                    
-                    <div class="mb-3">
-                        <label>ເຈົ້າຂອງ (ລາວ)</label>
-                        <input type="text" name="owner_name_lo" class="form-control">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label>ເຈົ້າຂອງ (ອັງກິດ)</label>
-                        <input type="text" name="owner_name_en" class="form-control">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label>ສະຖາປັດຕະຍະກຳ (ລາວ)</label>
-                        <input type="text" name="architectural_style_lo" class="form-control">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label>ສະຖາປັດຕະຍະກຳ (ອັງກິດ)</label>
-                        <input type="text" name="architectural_style_en" class="form-control">
-                    </div>
-                </div>
-            </div>
+                   
 
             <div class="col-md-6">
                 <div class="card-custom">
@@ -240,12 +235,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <label>ປະເພດເຮືອນ</label>
                         <select name="house_type" class="form-control">
                             <option value="">-- ເລືອກປະເພດເຮືອນ --</option>
-                            <option value="ຫຼັງຄາດ່ຽວ">ຫຼັງຄາດ່ຽວ</option>
-                            <option value="ຫຼັງຄາດ່ຽວມີເຊຍ">ຫຼັງຄາດ່ຽວມີເຊຍ</option>
-                            <option value="ຫຼັງຄາດ່ຽວເຮືອນຄົວຂວາງ">ຫຼັງຄາດ່ຽວເຮືອນຄົວຂວາງ</option>
-                            <option value="ເຮືອນເປັນຫ້ອງແຖວ">ເຮືອນເປັນຫ້ອງແຖວ</option>
-                            <option value="ອາຄານຫ້ອງແຖວເປັນລະບົບ">ອາຄານຫ້ອງແຖວເປັນລະບົບ</option>
-                            <option value="ເຮືອນແບບປະສົມ">ເຮືອນແບບປະສົມ</option>
+                            <option value="ຫຼັງຄາດ່ຽວ (Single-Pitch Roof)">ຫຼັງຄາດ່ຽວ (Single-Pitch Roof)</option>
+                            <option value="ຫຼັງຄາດ່ຽວມີເຊຍ (Single-Pitch Roof with Gable)">ຫຼັງຄາດ່ຽວມີເຊຍ (Single-Pitch Roof with Gable)</option>
+                            <option value="ຫຼັງຄາດ່ຽວເຮືອນຄົວຂວາງ (Single-Pitch Roof with Detached Kitchen)">ຫຼັງຄາດ່ຽວເຮືອນຄົວຂວາງ (Single-Pitch Roof with Detached Kitchen)</option>
+                            <option value="ເຮືອນເປັນຫ້ອງແຖວ (Row House)">ເຮືອນເປັນຫ້ອງແຖວ (Row House)</option>
+                            <option value="ອາຄານຫ້ອງແຖວເປັນລະບົບ (Systematic Row House Building)">ອາຄານຫ້ອງແຖວເປັນລະບົບ (Systematic Row House Building)</option>
+                            <option value="ເຮືອນແບບປະສົມ (Mixed-Style House)">ເຮືອນແບບປະສົມ (Mixed-Style House)</option>
                         </select>
                     </div>
                     
@@ -253,12 +248,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <label>ວັດສະດຸກໍ່ສ້າງ</label>
                         <select name="building_material" class="form-control">
                             <option value="">-- ເລືອກວັດສະດຸ --</option>
-                            <option value="ໄມ້">ໄມ້</option>
-                            <option value="ໄມ້/ຕ໋ອກຊີ">ໄມ້/ຕ໋ອກຊີ</option>
-                            <option value="ໄມ້/ດິນຈີ່ກໍ່ປະທາຍປູນ">ໄມ້/ດິນຈີ່ກໍ່ປະທາຍປູນ</option>
-                            <option value="ດິນຈີ່ກໍ່ປະທາຍປູນ">ດິນຈີ່ກໍ່ປະທາຍປູນ</option>
-                            <option value="ດິນຈີ່ກໍ່ປະທາຍປູນ/ຕ໋ອກຊີ">ດິນຈີ່ກໍ່ປະທາຍປູນ/ຕ໋ອກຊີ</option>
-                            <option value="ໄມ້/ຕ໋ອກຊີ/ດິນຈີ່ກໍ່ປະທາຍປູນ">ໄມ້/ຕ໋ອກຊີ/ດິນຈີ່ກໍ່ປະທາຍປູນ</option>
+                            <option value="ໄມ້ (Bois)">ໄມ້ (Bois)</option>
+                            <option value="ໄມ້/ຕ໋ອກຊີ (Bois/Torchis)">ໄມ້/ຕ໋ອກຊີ (Bois/Torchis)</option>
+                            <option value="ໄມ້/ດິນຈີ່ກໍ່ປະທາຍປູນ (Bois/Brique Chaux)">ໄມ້/ດິນຈີ່ກໍ່ປະທາຍປູນ (Bois/Brique Chaux)</option>
+                            <option value="ດິນຈີ່ກໍ່ປະທາຍປູນ (Brique/Chaux)">ດິນຈີ່ກໍ່ປະທາຍປູນ (Brique/Chaux)</option>
+                            <option value="ດິນຈີ່ກໍ່ປະທາຍປູນ/ຕ໋ອກຊີ (Brique Chaux/Torchis)">ດິນຈີ່ກໍ່ປະທາຍປູນ/ຕ໋ອກຊີ (Brique Chaux/Torchis)</option>
+                            <option value="ໄມ້/ຕ໋ອກຊີ/ດິນຈີ່ກໍ່ປະທາຍປູນ (Bois/Torchis et Brique Chaux)">ໄມ້/ຕ໋ອກຊີ/ດິນຈີ່ກໍ່ປະທາຍປູນ (Bois/Torchis et Brique Chaux)</option>
                         </select>
                     </div>
                     
@@ -278,11 +273,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label>ປະຫວັດຂອງເຮືອນ (ລາວ)</label>
+                    <label>ຂໍ້ມູນເຮືອນ (ລາວ)</label>
                     <textarea name="historical_significance_lo" class="form-control" rows="3" placeholder="ອະທິບາຍຄວາມສຳຄັນ..."></textarea>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label>ປະຫວັດຂອງເຮືອນ (ອັງກິດ)</label>
+                    <label>ຂໍ້ມູນເຮືອນ (ອັງກິດ)</label>
                     <textarea name="historical_significance_en" class="form-control" rows="3" placeholder="Historical significance..."></textarea>
                 </div>
             </div>

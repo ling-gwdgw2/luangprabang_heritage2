@@ -23,17 +23,16 @@ $imgResult = mysqli_query($connect, $imgQuery);
 $images = [];
 while ($img = mysqli_fetch_assoc($imgResult)) { $images[] = $img; }
 
-// ດຶງປະເພດທັງໝົດ
-$catQuery = "SELECT * FROM heritage_categories ORDER BY category_id";
-$catResult = mysqli_query($connect, $catQuery);
+// ດຶງປະເພດທັງໝົດ (safe: table may not exist on all envs)
 $allCategories = [];
-while ($cat = mysqli_fetch_assoc($catResult)) { $allCategories[] = $cat; }
+$catResult = mysqli_query($connect, "SELECT * FROM heritage_categories ORDER BY category_id");
+if ($catResult) { while ($cat = mysqli_fetch_assoc($catResult)) { $allCategories[] = $cat; } }
 
 // ດຶງປະເພດຂອງເຮືອນນີ້
-$hcQuery = "SELECT category_id FROM house_categories WHERE house_id = $house_id";
-$hcResult = mysqli_query($connect, $hcQuery);
 $houseCatIds = [];
-while ($hc = mysqli_fetch_assoc($hcResult)) { $houseCatIds[] = $hc['category_id']; }
+$hcResult = mysqli_query($connect, "SELECT category_id FROM house_categories WHERE house_id = $house_id");
+if ($hcResult) { while ($hc = mysqli_fetch_assoc($hcResult)) { $houseCatIds[] = $hc['category_id']; } }
+
 
 $message = ''; 
 $message_type = '';
@@ -88,7 +87,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['delete_image_ids']) && is_array($_POST['delete_image_ids'])) {
         foreach ($_POST['delete_image_ids'] as $del_id) {
             $del_id = intval($del_id);
-            $delRow = mysqli_fetch_assoc(mysqli_query($connect, "SELECT image_path FROM heritage_images WHERE image_id=$del_id AND house_id=$house_id"));
+            $delRes = mysqli_query($connect, "SELECT image_path FROM heritage_images WHERE image_id=$del_id AND house_id=$house_id");
+            $delRow = $delRes ? mysqli_fetch_assoc($delRes) : null;
             if ($delRow) {
                 if ($delRow['image_path'] && file_exists($upload_dir . $delRow['image_path'])) unlink($upload_dir . $delRow['image_path']);
                 mysqli_query($connect, "DELETE FROM heritage_images WHERE image_id=$del_id AND house_id=$house_id");
@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // ໂຫຼດຮູບໃໝ່ຫຼັງລຶບ
         $imgResult2 = mysqli_query($connect, "SELECT * FROM heritage_images WHERE house_id = $house_id ORDER BY display_order");
         $images = [];
-        while ($img2 = mysqli_fetch_assoc($imgResult2)) { $images[] = $img2; }
+        if ($imgResult2) { while ($img2 = mysqli_fetch_assoc($imgResult2)) { $images[] = $img2; } }
     }
 
     $updateQuery = "UPDATE heritage_houses SET 
@@ -123,12 +123,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     WHERE house_id=$house_id";
     
     if (mysqli_query($connect, $updateQuery)) {
-        // ອັບເດດ house_categories
-        mysqli_query($connect, "DELETE FROM house_categories WHERE house_id=$house_id");
+        // ອັບເດດ house_categories (safe: table may not exist)
+        @mysqli_query($connect, "DELETE FROM house_categories WHERE house_id=$house_id");
         if (isset($_POST['categories']) && is_array($_POST['categories'])) {
             foreach ($_POST['categories'] as $cat_id) {
                 $cat_id = intval($cat_id);
-                mysqli_query($connect, "INSERT IGNORE INTO house_categories (house_id, category_id) VALUES ($house_id, $cat_id)");
+                @mysqli_query($connect, "INSERT IGNORE INTO house_categories (house_id, category_id) VALUES ($house_id, $cat_id)");
             }
         }
 
@@ -168,14 +168,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // ອັບເດດ houseCatIds ຫຼັງ save
-        $hcResult2 = mysqli_query($connect, "SELECT category_id FROM house_categories WHERE house_id=$house_id");
         $houseCatIds = [];
-        while ($hc2 = mysqli_fetch_assoc($hcResult2)) { $houseCatIds[] = $hc2['category_id']; }
+        $hcResult2 = mysqli_query($connect, "SELECT category_id FROM house_categories WHERE house_id=$house_id");
+        if ($hcResult2) { while ($hc2 = mysqli_fetch_assoc($hcResult2)) { $houseCatIds[] = $hc2['category_id']; } }
 
         $message = 'ອັບເດດຂໍ້ມູນສຳເລັດ!';
         $message_type = 'success';
         // Refresh house data
-        $house = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM heritage_houses WHERE house_id = $house_id"));
+        $houseRefresh = mysqli_query($connect, "SELECT * FROM heritage_houses WHERE house_id = $house_id");
+        if ($houseRefresh) { $house = mysqli_fetch_assoc($houseRefresh); }
     } else {
         $message = 'ຜິດພາດ: ' . mysqli_error($connect);
         $message_type = 'danger';

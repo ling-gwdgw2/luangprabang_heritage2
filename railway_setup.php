@@ -105,12 +105,14 @@ if ($connect) {
     }
 
     // Add missing columns to visit_logs if the table already existed without them
-    $alter_queries = [
-        "ALTER TABLE visit_logs ADD COLUMN IF NOT EXISTS visitor_device VARCHAR(255)",
-        "ALTER TABLE visit_logs ADD COLUMN IF NOT EXISTS visit_time TIME",
-    ];
-    foreach ($alter_queries as $q) {
-        mysqli_query($connect, $q);
+    $check_device = mysqli_query($connect, "SHOW COLUMNS FROM visit_logs LIKE 'visitor_device'");
+    if (mysqli_num_rows($check_device) == 0) {
+        mysqli_query($connect, "ALTER TABLE visit_logs ADD COLUMN visitor_device VARCHAR(255)");
+    }
+    
+    $check_time = mysqli_query($connect, "SHOW COLUMNS FROM visit_logs LIKE 'visit_time'");
+    if (mysqli_num_rows($check_time) == 0) {
+        mysqli_query($connect, "ALTER TABLE visit_logs ADD COLUMN visit_time TIME");
     }
     echo "<p style='color: green'>✅ visit_logs columns verified</p>";
     

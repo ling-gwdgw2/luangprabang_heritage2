@@ -37,7 +37,7 @@ if ($connect) {
         foreach (glob($upload_dir . '*') as $filepath) {
             if (!is_file($filepath)) continue;
             $fname = basename($filepath);
-            $check = mysqli_fetch_assoc(mysqli_query($connect, "SELECT id FROM image_store WHERE filename='" . mysqli_real_escape_string($connect, $fname) . "'"));
+            $check = mysqli_fetch_assoc(mysqli_query($connect, "SELECT filename FROM image_store WHERE filename='" . mysqli_real_escape_string($connect, $fname) . "'"));
             if ($check) { $skipped++; continue; }
             $mime = function_exists('mime_content_type') ? mime_content_type($filepath) : 'image/jpeg';
             $data = base64_encode(file_get_contents($filepath));
@@ -51,16 +51,26 @@ if ($connect) {
 
     // Fix visit_logs schema: add missing columns if they don't exist
     echo "<h2>ກວດສອບ visit_logs...</h2>";
-    $fixes = [
-        "ALTER TABLE visit_logs ADD COLUMN IF NOT EXISTS visitor_device VARCHAR(255)",
-        "ALTER TABLE visit_logs ADD COLUMN IF NOT EXISTS visit_time TIME",
-    ];
-    foreach ($fixes as $q) {
-        if (mysqli_query($connect, $q)) {
-            echo "<p style='color:green'>✅ " . htmlspecialchars($q) . "</p>";
+    $check_device = mysqli_query($connect, "SHOW COLUMNS FROM visit_logs LIKE 'visitor_device'");
+    if (mysqli_num_rows($check_device) == 0) {
+        if (mysqli_query($connect, "ALTER TABLE visit_logs ADD COLUMN visitor_device VARCHAR(255)")) {
+            echo "<p style='color:green'>✅ Added column visitor_device</p>";
         } else {
-            echo "<p style='color:orange'>ℹ️ " . mysqli_error($connect) . "</p>";
+            echo "<p style='color:red'>❌ Error adding visitor_device: " . mysqli_error($connect) . "</p>";
         }
+    } else {
+        echo "<p style='color:green'>✅ Column visitor_device already exists</p>";
+    }
+    
+    $check_time = mysqli_query($connect, "SHOW COLUMNS FROM visit_logs LIKE 'visit_time'");
+    if (mysqli_num_rows($check_time) == 0) {
+        if (mysqli_query($connect, "ALTER TABLE visit_logs ADD COLUMN visit_time TIME")) {
+            echo "<p style='color:green'>✅ Added column visit_time</p>";
+        } else {
+            echo "<p style='color:red'>❌ Error adding visit_time: " . mysqli_error($connect) . "</p>";
+        }
+    } else {
+        echo "<p style='color:green'>✅ Column visit_time already exists</p>";
     }
 
     $vlog = mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(*) as c FROM visit_logs"));

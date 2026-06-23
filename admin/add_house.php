@@ -138,6 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>ເພີ່ມຂໍ້ມູນເຮືອນມໍລະດົກ</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="stylesheet" href="style.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -208,8 +209,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <input type="number" name="construction_year" class="form-control" min="1000" max="2025">
                         </div>
                     </div>
-                   
-
+                </div>
+            </div>
+            
             <div class="col-md-6">
                 <div class="card-custom">
                     <h5 class="mb-3">
@@ -249,6 +251,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <small class="text-muted">ຂະໜາດແນະນຳ: 800x600px (JPG, PNG, GIF)</small>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- ===== ແຜນທີ່ (Map Picker) ===== -->
+        <div class="card-custom">
+            <div class="card-body">
+                <div class="section-title"><i class="fas fa-map-marker-alt"></i> ຕຳແໜ່ງ GPS ໃນແຜນທີ່</div>
+                <p class="text-muted" style="font-size:0.85rem; margin-bottom:12px;"><i class="fas fa-hand-pointer" style="color:#2d6a4f;"></i> ຄລິກໃສ່ແຜນທີ່ເພື່ອເລືອກຕຳແໜ່ງ ຫຼື ພິມພິກັດດ້ານລຸ່ມ</p>
+                <div id="map-picker"></div>
+                <div class="map-coord-display">
+                    <div class="coord-field">
+                        <label class="form-label" style="font-size:0.82rem;">Latitude</label>
+                        <input type="number" name="latitude" id="lat_input" class="form-control" step="0.0000001" value="" placeholder="19.8973" oninput="updatePinFromInputs()">
+                    </div>
+                    <div class="coord-field">
+                        <label class="form-label" style="font-size:0.82rem;">Longitude</label>
+                        <input type="number" name="longitude" id="lng_input" class="form-control" step="0.0000001" value="" placeholder="102.1432" oninput="updatePinFromInputs()">
+                    </div>
+                    <div style="display:flex; align-items:flex-end; padding-bottom:4px;">
+                        <button type="button" class="btn-clear-pin" onclick="clearPin()"><i class="fas fa-times"></i> ລ້າງພິກັດ</button>
+                    </div>
+                </div>
+                <div class="coord-hint"><i class="fas fa-lightbulb"></i> ຫຼວງພະບາງ: ≈ 19.8967°N, 102.1350°E</div>
             </div>
         </div>
 
@@ -391,8 +416,54 @@ document.getElementById('submitBtn').addEventListener('click', function(e) {
         }
     });
 });
+// ===== Map Picker =====
+const luangPrabangCenter = [19.8967, 102.1350];
+const pickerMap = L.map('map-picker', { zoomControl: true }).setView(luangPrabangCenter, 16);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 19
+}).addTo(pickerMap);
+
+let pickerMarker = null;
+
+function setPin(lat, lng) {
+    if (pickerMarker) { pickerMarker.setLatLng([lat, lng]); }
+    else {
+        pickerMarker = L.marker([lat, lng], { draggable: true }).addTo(pickerMap);
+        pickerMarker.on('dragend', function(e) {
+            const pos = e.target.getLatLng();
+            document.getElementById('lat_input').value = pos.lat.toFixed(7);
+            document.getElementById('lng_input').value = pos.lng.toFixed(7);
+        });
+    }
+    document.getElementById('lat_input').value = lat.toFixed ? lat.toFixed(7) : lat;
+    document.getElementById('lng_input').value = lng.toFixed ? lng.toFixed(7) : lng;
+    document.getElementById('map-picker').classList.add('has-marker');
+}
+
+pickerMap.on('click', function(e) {
+    setPin(e.latlng.lat, e.latlng.lng);
+    pickerMap.setView(e.latlng, pickerMap.getZoom());
+});
+
+function updatePinFromInputs() {
+    const lat = parseFloat(document.getElementById('lat_input').value);
+    const lng = parseFloat(document.getElementById('lng_input').value);
+    if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+        setPin(lat, lng);
+        pickerMap.setView([lat, lng], pickerMap.getZoom());
+    }
+}
+
+function clearPin() {
+    if (pickerMarker) { pickerMap.removeLayer(pickerMarker); pickerMarker = null; }
+    document.getElementById('lat_input').value = '';
+    document.getElementById('lng_input').value = '';
+    document.getElementById('map-picker').classList.remove('has-marker');
+}
 </script>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

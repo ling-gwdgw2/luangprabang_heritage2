@@ -107,7 +107,10 @@
         <div class="text-center mb-4 fade-in">
             <i class="fas fa-landmark fa-4x text-white mb-3"></i>
             <h1 class="heritage-title" id="title-main">ມໍລະດົກຫຼວງພະບາງ</h1>
-            <p id="subtitle-main" class="text-white">ສະແກນ QR Code ເພື່ອຮຽນຮູ້ເລື່ອງລາວຂອງເຮືອນມໍລະດົກແຕ່ລະຫຼັງ</p>
+            <p id="subtitle-main" class="text-white">ສະແກນ QR Code ເພື່ອຮຽນຮູ້ເລື່ອງລາວของເຮືອນມໍລະດົກແຕ່ລະຫຼັງ</p>
+            <div class="mt-3">
+                <a href="map.php" id="btn-map" class="btn btn-scan"><i class="fas fa-map-marked-alt"></i> <span id="map-btn-text">ເບິ່ງແຜນທີ່ມໍລະດົກ</span></a>
+            </div>
         </div>
         
         <div class="row justify-content-center">
@@ -176,7 +179,8 @@
     
     <script>
         let html5QrCode = null;
-        let currentLang = 'lo';
+        let currentLang = new URLSearchParams(window.location.search).get('lang') || 'lo';
+        if (currentLang !== 'en') currentLang = 'lo';
         let isScanning = false;
         let currentMode = 'camera';
         
@@ -202,7 +206,8 @@
                 no_results: 'ບໍ່ພົບຂໍ້ມູນ',
                 error_scan: 'ການສະແກນລົ້ມເຫຼວ, ກະລຸນາລອງໃໝ່',
                 info_title: 'ວິທີການໃຊ້ງານ',
-                info_desc: '1. ເລືອກ "ສະແກນດ້ວຍກ້ອງ" ເພື່ອໃຊ້ກ້ອງຖ່າຍຮູບ\n2. ຫຼື ເລືອກ "ອັບໂຫຼດຮູບພາບ" ເພື່ອເລືອກຮູບທີ່ມີ QR Code\n3. ລະບົບຈະສະແດງຂໍ້ມູນລາຍລະອຽດຂອງເຮືອນຫຼັງນັ້ນ'
+                info_desc: '1. ເລືອກ "ສະແກນດ້ວຍກ້ອງ" ເພື່ອໃຊ້ກ້ອງຖ່າຍຮູບ\n2. ຫຼື ເລືອກ "ອັບໂຫຼດຮູບພາບ" ເພື່ອເລືອກຮູບທີ່ມີ QR Code\n3. ລະບົບຈະສະແດງຂໍ້ມູນລາຍລະອຽດຂອງເຮືອນຫຼັງນັ້ນ',
+                map_btn: 'ເບິ່ງແຜນທີ່ມໍລະດົກ'
             },
             en: {
                 title_main: 'Luang Prabang Heritage',
@@ -225,7 +230,8 @@
                 no_results: 'No results found',
                 error_scan: 'Scan failed, please try again',
                 info_title: 'How to use',
-                info_desc: '1. Select "Scan with Camera" to use camera\n2. Or select "Upload Image" to choose an image with QR Code\n3. System will display detailed information'
+                info_desc: '1. Select "Scan with Camera" to use camera\n2. Or select "Upload Image" to choose an image with QR Code\n3. System will display detailed information',
+                map_btn: 'View Heritage Map'
             }
         };
         
@@ -238,7 +244,6 @@
             $('#scanner-desc').text(translations[currentLang].scanner_desc);
             const btnText = isScanning ? translations[currentLang].stop_btn : translations[currentLang].scan_btn;
             $('#scan-btn-text').text(btnText);
-            $('#mode-camera-text').text(translations[currentLang].mode_camera);
             $('#mode-upload-text').text(translations[currentLang].mode_upload);
             $('#upload-text').text(translations[currentLang].upload_text);
             $('#upload-supported').text(translations[currentLang].upload_supported);
@@ -248,6 +253,8 @@
             $('#info-title').text(translations[currentLang].info_title);
             $('#info-desc').text(translations[currentLang].info_desc);
             $('#lang-text').text(currentLang === 'lo' ? 'English' : 'ພາສາລາວ');
+            $('#map-btn-text').text(translations[currentLang].map_btn);
+            $('#btn-map').attr('href', 'map.php?lang=' + currentLang);
         }
         
         function switchMode(mode) {

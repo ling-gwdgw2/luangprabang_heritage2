@@ -1,3 +1,3 @@
 @echo off
 title Luang Prabang Heritage - Starting...
-powershell -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File "%~dp0start_local.ps1"
+powershell -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File "%~dp0start_local.ps1

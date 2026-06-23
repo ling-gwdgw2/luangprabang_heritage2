@@ -35,6 +35,12 @@ if ($connect) {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     
+    CREATE TABLE IF NOT EXISTS heritage_categories (
+        category_id INT AUTO_INCREMENT PRIMARY KEY,
+        category_name_lo VARCHAR(100) DEFAULT NULL,
+        category_name_en VARCHAR(100) DEFAULT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+    
     CREATE TABLE IF NOT EXISTS heritage_houses (
         house_id INT AUTO_INCREMENT PRIMARY KEY,
         qr_code VARCHAR(100) UNIQUE NOT NULL,
@@ -87,6 +93,14 @@ if ($connect) {
         visit_time TIME,
         FOREIGN KEY (house_id) REFERENCES heritage_houses(house_id) ON DELETE SET NULL
     );
+    
+    CREATE TABLE IF NOT EXISTS house_categories (
+        house_id INT NOT NULL,
+        category_id INT NOT NULL,
+        PRIMARY KEY (house_id, category_id),
+        FOREIGN KEY (house_id) REFERENCES heritage_houses(house_id) ON DELETE CASCADE,
+        FOREIGN KEY (category_id) REFERENCES heritage_categories(category_id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
     ";
 
     $queries = explode(';', $sql_tables);
@@ -123,13 +137,37 @@ if ($connect) {
         
         if (mysqli_num_rows($check_admin) == 0) {
             $insert = "INSERT INTO users (username, password, fullname_lo, role, status) 
-                       VALUES ('admin', '$hashed_password', 'ຜູ້ຈັດການລະບົບ', 'admin', 'active')";
+                       VALUES ('admin', '$hashed_password', 'ຜູ້ຈັດการລະບົບ', 'admin', 'active')";
             if (mysqli_query($connect, $insert)) {
                 echo "<p style='color: green'>✅ ສ້າງຜູ້ໃຊ້ admin ສຳເລັດ!</p>";
                 echo "<p>ຊື່ຜູ້ໃຊ້: <strong>admin</strong><br>ລະຫັດຜ່ານ: <strong>admin123</strong></p>";
             }
         } else {
             echo "<p>ℹ️ ຜູ້ໃຊ້ admin ມີແລ້ວ</p>";
+        }
+
+        // Seed default categories
+        $default_categories = [
+            [1, 'ເຮືອນພື້ນເມືອງ', 'Traditional House'],
+            [2, 'ວັດວາອາຮາມ', 'Temple'],
+            [3, 'ອາຄານສະໄໝຝຣັ່ງ', 'French Colonial Building'],
+            [4, 'ອາຄານສະໄໝລາວ-ຝຣັ່ງ', 'Lao-French Architecture'],
+            [5, 'ຮ້ານຄ້າພື້ນເມືອງ', 'Traditional Shop House']
+        ];
+        foreach ($default_categories as $cat) {
+            $cat_id = $cat[0];
+            $cat_lo = mysqli_real_escape_string($connect, $cat[1]);
+            $cat_en = mysqli_real_escape_string($connect, $cat[2]);
+            $check_cat = mysqli_query($connect, "SELECT * FROM heritage_categories WHERE category_id = $cat_id");
+            if ($check_cat && mysqli_num_rows($check_cat) == 0) {
+                $insert_cat = "INSERT INTO heritage_categories (category_id, category_name_lo, category_name_en) 
+                               VALUES ($cat_id, '$cat_lo', '$cat_en')";
+                if (mysqli_query($connect, $insert_cat)) {
+                    echo "<p style='color: green'>✅ Seeded category $cat_id ($cat_en) successfully!</p>";
+                } else {
+                    echo "<p style='color: red'>❌ Error seeding category $cat_id: " . mysqli_error($connect) . "</p>";
+                }
+            }
         }
     }
     

@@ -191,86 +191,20 @@ $slots = max(0, 3 - count($images));
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ແກ້ໄຂຂໍ້ມູນເຮືອນມໍລະດົກ</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@100..900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="style.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        * { font-family: 'Noto Sans Lao', 'Phetsarath OT', sans-serif; }
-        body { background: #f5f0e8; }
-        .sidebar { background: #1a472a; min-height: 100vh; color: white; position: fixed; width: 260px; top: 0; left: 0; z-index: 100; overflow-y: auto; }
-        .sidebar .brand { padding: 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.15); text-align: center; }
-        .sidebar .nav-link { color: rgba(255,255,255,0.85); padding: 12px 20px; border-radius: 10px; margin: 4px 10px; transition: all 0.2s; display: flex; align-items: center; gap: 12px; }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active { background: #2d6a4f; color: white; }
-        .sidebar .nav-link i { width: 20px; text-align: center; }
-        .main-content { margin-left: 260px; padding: 28px 32px; }
-        .page-header { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
-        .page-header h2 { margin: 0; font-size: 1.5rem; color: #1a472a; font-weight: 700; }
-        .card-custom { background: white; border-radius: 20px; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.07); margin-bottom: 24px; }
-        .card-custom .card-header-custom { padding: 18px 24px 0; }
-        .card-custom .card-body { padding: 20px 24px 24px; }
-        .section-title { font-size: 1rem; font-weight: 700; color: #1a472a; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; padding-bottom: 10px; border-bottom: 2px solid #e8f5e9; }
-        .form-label { font-weight: 600; color: #2d4a3e; font-size: 0.875rem; margin-bottom: 6px; }
-        .form-control, .form-select { border-radius: 10px; border: 1.5px solid #d1e8da; padding: 10px 14px; font-size: 0.9rem; transition: border-color 0.2s, box-shadow 0.2s; }
-        .form-control:focus, .form-select:focus { border-color: #2d6a4f; box-shadow: 0 0 0 3px rgba(45,106,79,0.12); }
-        .required-star { color: #e74c3c; margin-left: 3px; }
-
-        /* Map Picker */
-        #map-picker { height: 320px; border-radius: 14px; border: 2px solid #d1e8da; overflow: hidden; cursor: crosshair; }
-        #map-picker.has-marker { border-color: #2d6a4f; }
-        .map-coord-display { background: #f0f7f2; border-radius: 10px; padding: 12px 16px; margin-top: 12px; display: flex; gap: 16px; flex-wrap: wrap; }
-        .coord-field { flex: 1; min-width: 160px; }
-        .coord-hint { font-size: 0.78rem; color: #666; margin-top: 6px; }
-        .coord-hint i { color: #2d6a4f; }
-        .btn-clear-pin { background: none; border: 1px solid #dc3545; color: #dc3545; border-radius: 8px; padding: 4px 12px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
-        .btn-clear-pin:hover { background: #dc3545; color: white; }
-
-        /* Image area */
-        .image-preview { width: 100px; height: 100px; object-fit: cover; border-radius: 10px; }
-        .img-wrap { position: relative; display: inline-block; margin: 5px; }
-        .img-remove-btn { position: absolute; top: -6px; right: -6px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3); transition: background 0.2s; }
-        .img-remove-btn:hover { background: #a71d2a; }
-
-        /* Category checkboxes */
-        .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
-        .cat-item { background: #f0f7f2; border: 1.5px solid #d1e8da; border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s; }
-        .cat-item:hover { border-color: #2d6a4f; background: #e3f2e9; }
-        .cat-item input[type=checkbox] { width: 18px; height: 18px; accent-color: #2d6a4f; cursor: pointer; }
-        .cat-item input[type=checkbox]:checked + .cat-label-wrap { color: #1a472a; font-weight: 700; }
-        .cat-item.selected { border-color: #2d6a4f; background: #e8f5e9; }
-        .cat-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-
-        /* Action buttons */
-        .action-bar { background: white; border-radius: 20px; padding: 20px 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.07); display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
-        .btn-save { background: #2d6a4f; color: white; border: none; border-radius: 50px; padding: 12px 36px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
-        .btn-save:hover { background: #1a472a; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(45,106,79,0.35); }
-        .btn-cancel-link { background: #f1f3f5; color: #495057; border: none; border-radius: 50px; padding: 12px 28px; font-size: 1rem; font-weight: 600; text-decoration: none; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
-        .btn-cancel-link:hover { background: #dee2e6; color: #343a40; }
-        .status-toggle { display: flex; align-items: center; gap: 10px; }
-        .toggle-switch { position: relative; width: 52px; height: 28px; }
-        .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #ccc; border-radius: 28px; transition: 0.3s; }
-        .toggle-slider:before { position: absolute; content: ''; height: 22px; width: 22px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
-        input:checked + .toggle-slider { background: #2d6a4f; }
-        input:checked + .toggle-slider:before { transform: translateX(24px); }
-
-        @media (max-width: 768px) {
-            .sidebar { width: 64px; }
-            .sidebar .nav-link span { display: none; }
-            .sidebar .brand h6 { display: none; }
-            .main-content { margin-left: 64px; padding: 16px; }
-        }
-    </style>
 </head>
 <body>
 
 <!-- Sidebar -->
 <div class="sidebar">
     <div class="brand">
-        <i class="fas fa-landmark fa-2x mb-2" style="color: #81c784;"></i>
-        <h6 class="mb-0" style="font-size:0.9rem;">ມໍລະດົກຫຼວງພະບາງ</h6>
+        <i class="fas fa-landmark fa-2x"></i>
+        <h6>ມໍລະດົກຫຼວງພະບາງ</h6>
     </div>
     <nav class="nav flex-column mt-2">
         <a class="nav-link" href="dashboard.php"><i class="fas fa-tachometer-alt"></i><span>ໜ້າຫຼັກ</span></a>
@@ -284,9 +218,10 @@ $slots = max(0, 3 - count($images));
 <!-- Main Content -->
 <div class="main-content">
     <div class="page-header">
-        <a href="houses.php" style="color:#2d6a4f; text-decoration:none;"><i class="fas fa-chevron-left"></i></a>
-        <i class="fas fa-edit" style="color:#2d6a4f; font-size:1.4rem;"></i>
-        <h2>ແກ້ໄຂຂໍ້ມູນ — <?php echo htmlspecialchars($house['house_name_lo'] ?: $house['house_number'] ?: "ເຮືອນ #$house_id"); ?></h2>
+        <div class="page-header-title-area">
+            <a href="houses.php"><i class="fas fa-chevron-left fa-lg me-2"></i></a>
+            <h2>ແກ້ໄຂຂໍ້ມູນ — <?php echo htmlspecialchars($house['house_name_lo'] ?: $house['house_number'] ?: "ເຮືອນ #$house_id"); ?></h2>
+        </div>
     </div>
 
     <form method="POST" enctype="multipart/form-data" id="editForm">
@@ -541,10 +476,10 @@ $slots = max(0, 3 - count($images));
         <!-- ===== Action Bar ===== -->
         <div class="action-bar">
             <div class="d-flex gap-3 align-items-center flex-wrap">
-                <button type="button" class="btn-save" id="submitBtn">
+                <button type="button" class="btn-custom" id="submitBtn">
                     <i class="fas fa-save"></i> ບັນທຶກການແກ້ໄຂ
                 </button>
-                <a href="houses.php" class="btn-cancel-link">
+                <a href="houses.php" class="btn-cancel-custom">
                     <i class="fas fa-times"></i> ຍົກເລີກ
                 </a>
             </div>

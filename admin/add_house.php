@@ -136,38 +136,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>ເພີ່ມຂໍ້ມູນເຮືອນມໍລະດົກ</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@100..900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        * { font-family: 'Noto Sans Lao', 'Phetsarath OT', sans-serif; }
-        body { background: #f5f0e8; }
-        .sidebar { background: #1a472a; min-height: 100vh; width: 260px; position: fixed; }
-        .sidebar .nav-link { color: rgba(255,255,255,0.85); padding: 14px 24px; border-radius: 10px; margin: 5px 10px; }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active { background: #2d6a4f; color: white; }
-        .sidebar .nav-link i { margin-right: 12px; width: 25px; }
-        .main-content { margin-left: 260px; padding: 20px; }
-        .card-custom { background: white; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); padding: 20px; margin-bottom: 20px; }
-        .btn-custom { background: #2d6a4f; border: none; border-radius: 50px; padding: 10px 25px; color: white; }
-        .btn-custom:hover { background: #1a472a; }
-        .btn-cancel { background: #6c757d; border: none; border-radius: 50px; padding: 10px 25px; color: white; }
-        .btn-cancel:hover { background: #5a6268; }
-        .required:after { content: " *"; color: red; }
-        .image-preview { width: 100px; height: 100px; object-fit: cover; border-radius: 10px; margin-top: 10px; }
-        .form-label { font-weight: bold; color: #1a472a; margin-bottom: 5px; display: block; }
-        @media (max-width:768px){ .sidebar { width: 70px; } .sidebar .nav-link span { display: none; } .main-content { margin-left: 70px; } }
-    </style>
-    
 </head>
 <body>
 
 <!-- Sidebar -->
 <div class="sidebar">
-    <div class="p-3 text-center border-bottom border-success">
+    <div class="brand">
         <i class="fas fa-landmark fa-2x"></i>
-        <h6 class="d-none d-md-block mt-2">ເຮືອນມໍລະດົກຫຼວງພະບາງ</h6>
+        <h6>ມໍລະດົກຫຼວງພະບາງ</h6>
     </div>
     <nav class="nav flex-column mt-2">
         <a class="nav-link" href="dashboard.php"><i class="fas fa-tachometer-alt"></i> <span>ໜ້າຫຼັກ</span></a>
@@ -180,8 +161,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!-- Main Content -->
 <div class="main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-plus-circle text-success"></i> ເພີ່ມຂໍ້ມູນເຮືອນມໍລະດົກ</h2>
+    <div class="page-header">
+        <div class="page-header-title-area">
+            <h2><i class="fas fa-plus-circle"></i> ເພີ່ມຂໍ້ມູນເຮືອນມໍລະດົກ</h2>
+        </div>
     </div>
 
     <?php if ($message): ?>
@@ -321,13 +304,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </button>
         </div>
 
-        <div class="text-center mt-4">
-            <button type="button" class="btn-custom btn-lg px-5" id="submitBtn">
-                <i class="fas fa-save"></i> ບັນທຶກຂໍ້ມູນ
-            </button>
-            <a href="houses.php" class="btn-cancel btn-lg px-5 ms-2">
-                <i class="fas fa-times"></i> ຍົກເລີກ
-            </a>
+        <div class="action-bar">
+            <div class="d-flex gap-3 align-items-center">
+                <button type="button" class="btn-custom" id="submitBtn">
+                    <i class="fas fa-save"></i> ບັນທຶກຂໍ້ມູນ
+                </button>
+                <a href="houses.php" class="btn-cancel-custom">
+                    <i class="fas fa-times"></i> ຍົກເລີກ
+                </a>
+            </div>
         </div>
     </form>
 </div>

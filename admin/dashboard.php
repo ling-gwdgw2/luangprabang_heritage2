@@ -15,36 +15,22 @@ $recentHouses = mysqli_query($connect, "SELECT * FROM heritage_houses ORDER BY c
 ?>
 <!DOCTYPE html>
 <html lang="lo">
-<head><meta charset="UTF-8"><title>Dashboard | ຄຸ້ມຄອງມໍລະດົກ</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@100..900&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<style>
-    * { font-family: 'Noto Sans Lao', 'Phetsarath OT', sans-serif; }
-    body { background: #f5f0e8; }
-    .sidebar { background: #1a472a; min-height: 100vh; color: white; position: fixed; width: 260px; }
-    .sidebar .nav-link { color: rgba(255,255,255,0.85); padding: 12px 20px; border-radius: 10px; margin: 5px 10px; }
-    .sidebar .nav-link:hover, .sidebar .nav-link.active { background: #2d6a4f; color: white; }
-    .sidebar .nav-link i { margin-right: 12px; width: 25px; }
-    .main-content { margin-left: 260px; padding: 20px; }
-    .stat-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); transition: all 0.3s; border-left: 4px solid #2d6a4f; }
-    .stat-card:hover { transform: translateY(-5px); }
-    .stat-number { font-size: 28px; font-weight: bold; color: #1a472a; }
-    .card-custom { background: white; border-radius: 20px; border: none; box-shadow: 0 5px 20px rgba(0,0,0,0.08); }
-    .btn-success-custom { background: #2d6a4f; border: none; border-radius: 50px; padding: 8px 20px; }
-    .btn-success-custom:hover { background: #1a472a; }
-    @media (max-width: 768px) { .sidebar { width: 70px; } .sidebar .nav-link span:not(.nav-icon) { display: none; } .main-content { margin-left: 70px; } }
-</style>
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard | ຄຸ້ມຄອງມໍລະດົກ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 <div class="sidebar">
-    <div class="p-3 text-center border-bottom border-success mb-3">
-        <i class="fas fa-landmark fa-2x mb-2"></i>
-        <h6 class="mb-0 d-none d-md-block">ມໍລະດົກຫຼວງພະບາງ</h6>
+    <div class="brand">
+        <i class="fas fa-landmark fa-2x"></i>
+        <h6>ມໍລະດົກຫຼວງພະບາງ</h6>
     </div>
-    <nav class="nav flex-column">
+    <nav class="nav flex-column mt-2">
         <a class="nav-link active" href="dashboard.php"><i class="fas fa-tachometer-alt"></i> <span>ໜ້າຫຼັກ</span></a>
         <a class="nav-link" href="houses.php"><i class="fas fa-home"></i> <span>ຈັດການເຮືອນ</span></a>
         <a class="nav-link" href="add_house.php"><i class="fas fa-plus-circle"></i> <span>ເພີ່ມຂໍ້ມູນ</span></a>
@@ -56,30 +42,72 @@ $recentHouses = mysqli_query($connect, "SELECT * FROM heritage_houses ORDER BY c
     </nav>
 </div>
 <div class="main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-tachometer-alt text-success"></i> ໜ້າຫຼັກ</h2>
-        <div>
-            <span class="badge bg-success p-2 me-2"><i class="fas fa-user"></i> <?php echo htmlspecialchars($_SESSION['admin_name']); ?></span>
+    <div class="page-header">
+        <div class="page-header-title-area">
+            <h2><i class="fas fa-tachometer-alt"></i> ໜ້າຫຼັກ</h2>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="user-badge"><i class="fas fa-user"></i> <?php echo htmlspecialchars($_SESSION['admin_name']); ?></span>
             <?php if(canManageUsers()): ?>
-            <a href="add_user.php" class="btn btn-success btn-sm"><i class="fas fa-user-plus"></i> ເພີ່ມຜູ້ໃຊ້</a>
+            <a href="add_user.php" class="btn-custom"><i class="fas fa-user-plus"></i> ເພີ່ມຜູ້ໃຊ້</a>
             <?php endif; ?>
         </div>
     </div>
     <div class="row mb-4">
-        <div class="col-md-3 mb-3"><div class="stat-card"><div class="d-flex justify-content-between"><div><div class="stat-number"><?php echo $totalHouses; ?></div><div class="text-muted small">ເຮືອນມໍລະດົກທັງໝົດ</div></div><i class="fas fa-home fa-2x text-success"></i></div></div></div>
-        <div class="col-md-3 mb-3"><div class="stat-card"><div class="d-flex justify-content-between"><div><div class="stat-number"><?php echo $activeHouses; ?></div><div class="text-muted small">ເຮືອນທີ່ເປີດໃຫ້ຊົມ</div></div><i class="fas fa-check-circle fa-2x text-success"></i></div></div></div>
-        <div class="col-md-3 mb-3"><div class="stat-card"><div class="d-flex justify-content-between"><div><div class="stat-number"><?php echo number_format($totalVisits); ?></div><div class="text-muted small">ຜູ້ເຂົ້າຊົມທັງໝົດ</div></div><i class="fas fa-eye fa-2x text-success"></i></div></div></div>
-        <div class="col-md-3 mb-3"><div class="stat-card"><div class="d-flex justify-content-between"><div><div class="stat-number"><?php echo number_format($todayVisits); ?></div><div class="text-muted small">ຜູ້ເຂົ້າຊົມມື້ນີ້</div></div><i class="fas fa-calendar-day fa-2x text-success"></i></div></div></div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stat-card">
+                <div>
+                    <div class="stat-number"><?php echo $totalHouses; ?></div>
+                    <div class="stat-title">ເຮືອນມໍລະດົກທັງໝົດ</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-home"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stat-card">
+                <div>
+                    <div class="stat-number"><?php echo $activeHouses; ?></div>
+                    <div class="stat-title">ເຮືອນທີ່ເປີດໃຫ້ຊົມ</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stat-card">
+                <div>
+                    <div class="stat-number"><?php echo number_format($totalVisits); ?></div>
+                    <div class="stat-title">ຜູ້ເຂົ້າຊົມທັງໝົດ</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-eye"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stat-card">
+                <div>
+                    <div class="stat-number"><?php echo number_format($todayVisits); ?></div>
+                    <div class="stat-title">ຜູ້ເຂົ້າຊົມມື້ນີ້</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-day"></i>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="card card-custom">
-        <div class="card-header bg-white">
-            <h5 class="mb-0"><i class="fas fa-list text-success"></i> ເຮືອນມໍລະດົກລ່າສຸດ</h5>
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <h5><i class="fas fa-list"></i> ເຮືອນມໍລະດົກລ່າສຸດ</h5>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr><th>QR Code</th><th>ຊື່ເຮືອນ (ລາວ)</th><th>ຊື່ເຮືອນ (ອັງກິດ)</th><th>ການຈັດການ</th></tr>
+                    <thead>
+                        <tr><th>QR Code</th><th>ຊື່ເຮືອນ (ລາວ)</th><th>ຊື່ເຮືອນ (ອັງກິດ)</th><th style="width: 20%">ການຈັດການ</th></tr>
                     </thead>
                     <tbody>
                     <?php while ($house = mysqli_fetch_assoc($recentHouses)) { ?>
@@ -88,9 +116,9 @@ $recentHouses = mysqli_query($connect, "SELECT * FROM heritage_houses ORDER BY c
                             <td><?php echo htmlspecialchars($house['house_name_lo'] ?: '-'); ?></td>
                             <td><?php echo htmlspecialchars($house['house_name_en'] ?: '-'); ?></td>
                             <td>
-                                <a href="edit_house.php?id=<?php echo $house['house_id']; ?>" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></a>
-                                <button onclick="deleteHouse(<?php echo $house['house_id']; ?>)" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
-                                <button onclick="generateQR(<?php echo $house['house_id']; ?>)" class="btn btn-sm btn-info"><i class="fas fa-qrcode"></i></button>
+                                <a href="edit_house.php?id=<?php echo $house['house_id']; ?>" class="btn btn-sm btn-outline-warning me-1" title="ແກ້ໄຂ"><i class="fas fa-edit"></i></a>
+                                <button onclick="deleteHouse(<?php echo $house['house_id']; ?>)" class="btn btn-sm btn-outline-danger me-1" title="ລຶບ"><i class="fas fa-trash"></i></button>
+                                <button onclick="generateQR(<?php echo $house['house_id']; ?>)" class="btn btn-sm btn-outline-info" title="ສ້າງ QR Code"><i class="fas fa-qrcode"></i></button>
                             </td>
                         </tr>
                     <?php } if (mysqli_num_rows($recentHouses) == 0) echo '<tr><td colspan="5" class="text-center py-4 text-muted">ຍັງບໍ່ມີຂໍ້ມູນ</td></tr>'; ?>

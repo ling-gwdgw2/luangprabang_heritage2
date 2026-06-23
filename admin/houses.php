@@ -31,49 +31,26 @@ $total = mysqli_fetch_assoc($totalResult)['count'];
 $totalPages = ceil($total / $limit);
 $result = mysqli_query($connect, $query);
 ?>
-
 <!DOCTYPE html>
 <html lang="lo">
 <head>
     <meta charset="UTF-8">
     <title>ຈັດການເຮືອນມໍລະດົກ | Heritage Houses</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@100..900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        * { font-family: 'Noto Sans Lao', 'Phetsarath OT', sans-serif; }
-        body { background: #f5f0e8; }
-        .sidebar { background: #1a472a; min-height: 100vh; color: white; position: fixed; width: 260px; transition: all 0.3s; }
-        .sidebar .nav-link { color: rgba(255,255,255,0.85); padding: 12px 20px; border-radius: 10px; margin: 5px 10px; transition: all 0.3s; }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active { background: #2d6a4f; color: white; transform: translateX(5px); }
-        .sidebar .nav-link i { margin-right: 12px; width: 25px; }
-        .main-content { margin-left: 260px; padding: 20px; }
-        .card-custom { background: white; border-radius: 20px; border: none; box-shadow: 0 5px 20px rgba(0,0,0,0.08); overflow: hidden; }
-        .btn-custom { background: #2d6a4f; border: none; border-radius: 50px; padding: 8px 20px; color: white; transition: all 0.3s; }
-        .btn-custom:hover { background: #1a472a; transform: scale(1.02); }
-        .status-badge { padding: 5px 12px; border-radius: 50px; font-size: 0.75rem; }
-        .table th { background: #f8f9fa; font-weight: 600; }
-        .table td { vertical-align: middle; }
-        @media (max-width: 768px) { 
-            .sidebar { width: 70px; } 
-            .sidebar .nav-link span:not(.nav-icon) { display: none; } 
-            .main-content { margin-left: 70px; } 
-            .btn-custom { padding: 5px 12px; font-size: 12px; }
-            .btn-sm { padding: 2px 6px; font-size: 10px; }
-        }
-    </style>
 </head>
 <body>
 
 <!-- Sidebar -->
 <div class="sidebar">
-    <div class="p-3 text-center border-bottom border-success mb-3">
-        <i class="fas fa-landmark fa-2x mb-2"></i>
-        <h6 class="mb-0 d-none d-md-block">ມໍລະດົກຫຼວງພະບາງ</h6>
+    <div class="brand">
+        <i class="fas fa-landmark fa-2x"></i>
+        <h6>ມໍລະດົກຫຼວງພະບາງ</h6>
     </div>
-    <nav class="nav flex-column">
+    <nav class="nav flex-column mt-2">
         <a class="nav-link" href="dashboard.php"><i class="fas fa-tachometer-alt"></i> <span>ໜ້າຫຼັກ</span></a>
         <a class="nav-link active" href="houses.php"><i class="fas fa-home"></i> <span>ຈັດການເຮືອນ</span></a>
         <a class="nav-link" href="add_house.php"><i class="fas fa-plus-circle"></i> <span>ເພີ່ມຂໍ້ມູນ</span></a>
@@ -84,20 +61,22 @@ $result = mysqli_query($connect, $query);
 
 <!-- Main Content -->
 <div class="main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-home text-success"></i> ຈັດການເຮືອນມໍລະດົກ</h2>
+    <div class="page-header">
+        <div class="page-header-title-area">
+            <h2><i class="fas fa-home"></i> ຈັດการເຮືອນມໍລະດົກ</h2>
+        </div>
         <a href="add_house.php" class="btn-custom"><i class="fas fa-plus"></i> ເພີ່ມຂໍ້ມູນໃໝ່</a>
     </div>
 
     <!-- Search Form -->
     <div class="card-custom mb-4">
         <div class="card-body">
-            <form method="GET" class="row g-3">
-                <div class="col-md-8">
+            <form method="GET" class="row g-3 align-items-center">
+                <div class="col-md-9">
                     <input type="text" name="search" class="form-control form-control-lg" placeholder="ຄົ້ນຫາຕາມຊື່ ຫຼື QR Code..." value="<?php echo htmlspecialchars($search); ?>">
                 </div>
-                <div class="col-md-4">
-                    <button type="submit" class="btn-custom w-100"><i class="fas fa-search"></i> ຄົ້ນຫາ</button>
+                <div class="col-md-3">
+                    <button type="submit" class="btn-custom w-100 py-3"><i class="fas fa-search"></i> ຄົ້ນຫາ</button>
                 </div>
             </form>
         </div>
@@ -112,10 +91,9 @@ $result = mysqli_query($connect, $query);
                         <tr>
                             <th style="width: 5%">#</th>
                             <th style="width: 15%">QR Code</th>
-                            <th style="width: 20%">ຊື່ເຮືອນ (ລາວ)</th>
-                            <th style="width: 20%">ຊື່ເຮືອນ (ອັງກິດ)</th>
+                            <th style="width: 25%">ຊື່ເຮືອນ (ລາວ)</th>
+                            <th style="width: 25%">ຊື່ເຮືອນ (ອັງກິດ)</th>
                             <th style="width: 10%">ສະຖານະ</th>
-                            <?php // <th style="width: 10%">ຜູ້ເຂົ້າຊົມ</th> ?>
                             <th style="width: 20%">ການຈັດການ</th>
                         </tr>
                     </thead>
@@ -123,9 +101,6 @@ $result = mysqli_query($connect, $query);
                         <?php 
                         $count = $offset + 1; 
                         while ($house = mysqli_fetch_assoc($result)) { 
-                            // $visitCountQuery = "SELECT COUNT(*) as cnt FROM visit_logs WHERE house_id = " . $house['house_id'];
-                            // $visitCountResult = mysqli_query($connect, $visitCountQuery);
-                            // $visitCount = mysqli_fetch_assoc($visitCountResult)['cnt'];
                         ?>
                         <tr>
                             <td class="fw-bold"><?php echo $count++; ?></td>
@@ -133,26 +108,25 @@ $result = mysqli_query($connect, $query);
                             <td><?php echo htmlspecialchars($house['house_name_lo'] ?: '-'); ?></td>
                             <td><?php echo htmlspecialchars($house['house_name_en'] ?: '-'); ?></td>
                             <td>
-                                <span class="status-badge bg-<?php echo $house['status'] == 'active' ? 'success' : 'secondary'; ?> text-white">
+                                <span class="status-badge bg-<?php echo $house['status'] == 'active' ? 'success' : 'secondary'; ?>">
                                     <?php echo $house['status'] == 'active' ? 'ເປີດໃຊ້' : 'ປິດໃຊ້'; ?>
                                 </span>
                             </td>
-                            <?php // echo "<td>" . number_format($visitCount) . "</td>"; ?>
                             <td>
-                                <a href="edit_house.php?id=<?php echo $house['house_id']; ?>" class="btn btn-sm btn-warning me-1" title="ແກ້ໄຂ">
+                                <a href="edit_house.php?id=<?php echo $house['house_id']; ?>" class="btn btn-sm btn-outline-warning me-1" title="ແກ້ໄຂ">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <button onclick="deleteHouse(<?php echo $house['house_id']; ?>)" class="btn btn-sm btn-danger me-1" title="ລຶບ">
+                                <button onclick="deleteHouse(<?php echo $house['house_id']; ?>)" class="btn btn-sm btn-outline-danger me-1" title="ລຶບ">
                                     <i class="fas fa-trash"></i>
                                 </button>
-                                <button onclick="generateQR(<?php echo $house['house_id']; ?>)" class="btn btn-sm btn-info" title="ສ້າງ QR Code">
+                                <button onclick="generateQR(<?php echo $house['house_id']; ?>)" class="btn btn-sm btn-outline-info" title="ສ້າງ QR Code">
                                     <i class="fas fa-qrcode"></i>
                                 </button>
                             </td>
                         </tr>
                         <?php } 
                         if (mysqli_num_rows($result) == 0) { 
-                            echo '<tr><td colspan="7" class="text-center py-5 text-muted">
+                            echo '<tr><td colspan="6" class="text-center py-5 text-muted">
                                     <i class="fas fa-home fa-3x mb-2 d-block"></i>
                                     ຍັງບໍ່ມີຂໍ້ມູນ
                                   </td></tr>'; 

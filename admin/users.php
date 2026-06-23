@@ -39,47 +39,35 @@ $result = mysqli_query($connect, $query);
 <head>
     <meta charset="UTF-8">
     <title>ຈັດການຜູ້ໃຊ້ງານ</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@100..900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        * { font-family: 'Noto Sans Lao', 'Phetsarath OT', sans-serif; }
-        body { background: #f5f0e8; }
-        .sidebar { background: #1a472a; min-height: 100vh; color: white; position: fixed; width: 260px; }
-        .sidebar .nav-link { color: rgba(255,255,255,0.85); padding: 12px 20px; border-radius: 10px; margin: 5px 10px; }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active { background: #2d6a4f; color: white; }
-        .sidebar .nav-link i { margin-right: 12px; width: 25px; }
-        .main-content { margin-left: 260px; padding: 20px; }
-        .card-custom { background: white; border-radius: 20px; border: none; box-shadow: 0 5px 20px rgba(0,0,0,0.08); }
-        .btn-custom { background: #2d6a4f; border: none; border-radius: 50px; padding: 8px 20px; color: white; }
-        .btn-custom:hover { background: #1a472a; }
-        .btn-danger-custom { background: #dc3545; border: none; border-radius: 50px; padding: 8px 20px; color: white; }
-        .btn-danger-custom:hover { background: #c82333; }
-        @media (max-width: 768px) { .sidebar { width: 70px; } .sidebar .nav-link span:not(.nav-icon) { display: none; } .main-content { margin-left: 70px; } }
-    </style>
 </head>
 <body>
 <div class="sidebar">
-    <div class="p-3 text-center border-bottom border-success mb-3">
-        <i class="fas fa-landmark fa-2x mb-2"></i>
-        <h6 class="mb-0 d-none d-md-block">ມໍລະດົກຫຼວງພະບາງ</h6>
+    <div class="brand">
+        <i class="fas fa-landmark fa-2x"></i>
+        <h6>ມໍລະດົກຫຼວງພະບາງ</h6>
     </div>
-    <nav class="nav flex-column">
+    <nav class="nav flex-column mt-2">
         <a class="nav-link" href="dashboard.php"><i class="fas fa-tachometer-alt"></i> <span>ໜ້າຫຼັກ</span></a>
         <a class="nav-link" href="houses.php"><i class="fas fa-home"></i> <span>ຈັດການເຮືອນ</span></a>
         <a class="nav-link" href="add_house.php"><i class="fas fa-plus-circle"></i> <span>ເພີ່ມຂໍ້ມູນ</span></a>
         <a class="nav-link active" href="users.php"><i class="fas fa-users"></i> <span>ຈັດການຜູ້ໃຊ້</span></a>
         <a class="nav-link" href="add_user.php"><i class="fas fa-user-plus"></i> <span>ເພີ່ມຜູ້ໃຊ້</span></a>
-        <a class="nav-link" href="../map.php" target="_blank"><i class="fas fa-map-marked-alt"></i> <span>ແຜນທີ່ມໍລະດົก</span></a>
+        <a class="nav-link" href="report_views.php"> <i class="fas fa-chart-bar"></i><span>ລາຍງານການເຂົ້າຊົມ</span></a>
+        <a class="nav-link" href="../map.php" target="_blank"><i class="fas fa-map-marked-alt"></i> <span>ແຜນທີ່ມໍລະດົກ</span></a>
         <a class="nav-link" href="../api/logout.php"><i class="fas fa-sign-out-alt"></i> <span>ອອກຈາກລະບົບ</span></a>
     </nav>
 </div>
 
 <div class="main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-users text-success"></i> ຈັດການຜູ້ໃຊ້ງານ</h2>
+    <div class="page-header">
+        <div class="page-header-title-area">
+            <h2><i class="fas fa-users"></i> ຈັດການຜູ້ໃຊ້ງານ</h2>
+        </div>
         <a href="add_user.php" class="btn-custom"><i class="fas fa-user-plus"></i> ເພີ່ມຜູ້ໃຊ້ໃໝ່</a>
     </div>
     
@@ -91,7 +79,7 @@ $result = mysqli_query($connect, $query);
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover mb-0 align-middle">
-                    <thead class="table-light">
+                    <thead>
                         <tr>
                             <th style="width: 5%">#</th>
                             <th style="width: 12%">ຊື່ຜູ້ໃຊ້</th>
@@ -118,11 +106,15 @@ $result = mysqli_query($connect, $query);
                             <td><?php echo htmlspecialchars($row['fullname_en'] ?: '-'); ?></td>
                             <td><?php echo htmlspecialchars($row['email'] ?: '-'); ?></td>
                             <td><span class="badge bg-<?php echo $role_class; ?>"><?php echo $role_text; ?></span></td>
-                            <td><span class="badge bg-<?php echo $status_class; ?>"><?php echo $status_text; ?></span></td>
                             <td>
-                                <a href="edit_user.php?id=<?php echo $row['user_id']; ?>" class="btn btn-sm btn-warning me-1"><i class="fas fa-edit"></i></a>
+                                <span class="status-badge bg-<?php echo $status_class; ?>">
+                                    <?php echo $status_text; ?>
+                                </span>
+                            </td>
+                            <td>
+                                <a href="edit_user.php?id=<?php echo $row['user_id']; ?>" class="btn btn-sm btn-outline-warning me-1"><i class="fas fa-edit"></i></a>
                                 <?php if($row['role'] != 'admin'): ?>
-                                    <button onclick="deleteUser(<?php echo $row['user_id']; ?>)" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                    <button onclick="deleteUser(<?php echo $row['user_id']; ?>)" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
                                 <?php endif; ?>
                             </td>
                         </tr>

@@ -4,12 +4,8 @@
 // ຟັງຊັນກວດສອບສິດທິຂອງຜູ້ໃຊ້
 // ============================================
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 function getCurrentUserRole() {
-    return $_SESSION['admin_role'] ?? 'viewer';
+    return $_SESSION['admin_role'] ?? 'viewer'; // 🛠️ ລະບົບຂອງເຈົ້າໃຊ້ admin_role
 }
 
 function getUserRoleLevel($role = null) {
@@ -32,12 +28,12 @@ function hasPermission($required_role = 'viewer') {
 
 // ສາມາດເພີ່ມ/ແກ້ໄຂຂໍ້ມູນ (Admin ແລະ Staff)
 function canEdit() {
-    return in_array(getCurrentUserRole(), ['admin', 'staff']);
+    return in_array(getCurrentUserRole(), ['admin']);
 }
 
 // ສາມາດລຶບຂໍ້ມູນ (Admin ແລະ Staff)
 function canDelete() {
-    return in_array(getCurrentUserRole(), ['admin', 'staff']);
+    return in_array(getCurrentUserRole(), ['admin']);
 }
 
 // ສາມາດເພີ່ມຂໍ້ມູນ (Admin ແລະ Staff)
@@ -45,9 +41,9 @@ function canAdd() {
     return in_array(getCurrentUserRole(), ['admin', 'staff']);
 }
 
-// ສາມາດຈັດການຜູ້ໃຊ້ (Admin ແລະ Staff)
+// 🛠️ ແກ້ໄຂຈຸດນີ້: ເພີ່ມ 'staff' ເຂົ້າໄປ ເພື່ອໃຫ້ພະນັກງານສາມາດຈັດການຜູ້ໃຊ້ໄດ້
 function canManageUsers() {
-    return in_array(getCurrentUserRole(), ['admin', 'staff']);
+    return in_array(getCurrentUserRole(), ['admin']);
 }
 
 // ສະແດງຊື່ສິດເປັນພາສາລາວ

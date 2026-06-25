@@ -155,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <a class="nav-link" href="dashboard.php"><i class="fas fa-tachometer-alt"></i> <span>ໜ້າຫຼັກ</span></a>
         <a class="nav-link" href="houses.php"><i class="fas fa-home"></i> <span>ຈັດການເຮືອນ</span></a>
         <a class="nav-link active" href="add_house.php"><i class="fas fa-plus-circle"></i> <span>ເພີ່ມຂໍ້ມູນ</span></a>
-        <a class="nav-link" href="../map.php?from=admin" target="_blank"><i class="fas fa-map-marked-alt"></i> <span>ແຜນທີ່ມໍລະດົກ</span></a>
+        <a class="nav-link" href="../map.php?from=admin"><i class="fas fa-map-marked-alt"></i> <span>ແຜນທີ່ມໍລະດົກ</span></a>
         <a class="nav-link" href="../api/logout.php"><i class="fas fa-sign-out-alt"></i> <span>ອອກຈາກລະບົບ</span></a>
     </nav>
 </div>
@@ -179,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <form method="POST" enctype="multipart/form-data" id="houseForm">
         <div class="row">
             <div class="col-md-6">
-                <div class="card-custom">
+                <div class="card-custom h-100">
                     <h5 class="mb-3"><i class="fas fa-info-circle text-success"></i> ຂໍ້ມູນທົ່ວໄປ</h5>
                     
                     <div class="mb-3">
@@ -203,17 +203,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <input type="text" name="house_name_en" class="form-control">
                     </div>
                     
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label>ປີກໍ່ສ້າງ</label>
-                            <input type="number" name="construction_year" class="form-control" min="1000" max="2025">
-                        </div>
+                    <div class="mb-3">
+                        <label>ປີກໍ່ສ້າງ</label>
+                        <input type="number" name="construction_year" class="form-control" min="1000" max="2025">
                     </div>
                 </div>
             </div>
             
             <div class="col-md-6">
-                <div class="card-custom">
+                <div class="card-custom h-100">
                     <h5 class="mb-3">
                         <i class="fas fa-map-marker-alt text-success"></i> ປະເພດ ແລະ ວັດສະດຸ</h5>
                     

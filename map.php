@@ -3,19 +3,15 @@
 // ໄຟລ໌: map.php
 // ໜ້າສະແດງແຜນທີ່ເຮືອນມໍລະດົກຫຼວງພະບາງ
 // ============================================
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
 include_once 'config/database.php';
 
 // ກວດສອບພາສາ
 $lang = isset($_GET['lang']) ? trim($_GET['lang']) : 'lo';
 if ($lang !== 'en') $lang = 'lo';
 
-// ກວດສອບວ່າເປັນຜູ້ດູແລລະບົບ (ເຂົ້າສູ່ລະບົບແລ້ວ) ຫຼື ຜູ້ເຂົ້າຊົມທົ່ວໄປ
-$isAdmin = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
-// ປຸ່ມ "ກັບຄືນ": ຜູ້ດູແລ → admin/dashboard.php, ຜູ້ເຂົ້າຊົມ → index.php
-$backUrl = $isAdmin ? 'admin/dashboard.php' : 'index.php?lang=' . urlencode($lang);
+// ກວດສອບແຫຼ່ງທີ່ມາ: ມາຈາກໜ້າຈັດການ (?from=admin) → ກັບໄປ dashboard, ບໍ່ດັ່ງນັ້ນ → index
+$fromAdmin = isset($_GET['from']) && $_GET['from'] === 'admin';
+$backUrl = $fromAdmin ? 'admin/dashboard.php' : 'index.php?lang=' . urlencode($lang);
 
 // ດຶງຂໍ້ມູນປະເພດທັງໝົດ
 $cat_query = "SELECT * FROM heritage_categories";
@@ -559,7 +555,7 @@ while ($row = mysqli_fetch_assoc($house_result)) {
         
         function toggleLanguage() {
             const newLang = currentLang === 'lo' ? 'en' : 'lo';
-            window.location.href = `map.php?lang=${newLang}`;
+            window.location.href = `map.php?lang=${newLang}<?php echo $fromAdmin ? '&from=admin' : ''; ?>`;
         }
         
         function updateTexts() {

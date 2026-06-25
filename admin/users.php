@@ -58,7 +58,7 @@ $result = mysqli_query($connect, $query);
         <a class="nav-link active" href="users.php"><i class="fas fa-users"></i> <span>ຈັດການຜູ້ໃຊ້</span></a>
         <a class="nav-link" href="add_user.php"><i class="fas fa-user-plus"></i> <span>ເພີ່ມຜູ້ໃຊ້</span></a>
         <a class="nav-link" href="report_views.php"> <i class="fas fa-chart-bar"></i><span>ລາຍງານການເຂົ້າຊົມ</span></a>
-        <a class="nav-link" href="../map.php" target="_blank"><i class="fas fa-map-marked-alt"></i> <span>ແຜນທີ່ມໍລະດົກ</span></a>
+        <a class="nav-link" href="../map.php?from=admin" target="_blank"><i class="fas fa-map-marked-alt"></i> <span>ແຜນທີ່ມໍລະດົກ</span></a>
         <a class="nav-link" href="../api/logout.php"><i class="fas fa-sign-out-alt"></i> <span>ອອກຈາກລະບົບ</span></a>
     </nav>
 </div>

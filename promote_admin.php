@@ -10,6 +10,18 @@ include_once 'config/database.php';
 
 $target_username = 'admin';
 
+// 0) ສະແດງລາຍຊື່ user ທັງໝົດ ເພື່ອກວດສອບ
+echo "===== ລາຍຊື່ USER ທັງໝົດ =====\n";
+$all = mysqli_query($connect, "SELECT user_id, username, role, status FROM users ORDER BY user_id");
+if ($all) {
+    while ($u = mysqli_fetch_assoc($all)) {
+        echo "  id={$u['user_id']}  username='{$u['username']}'  role='{$u['role']}'  status='{$u['status']}'\n";
+    }
+} else {
+    echo "  (ດຶງຂໍ້ມູນບໍ່ໄດ້: " . mysqli_error($connect) . ")\n";
+}
+echo "================================\n\n";
+
 // 1) ສະແດງສະຖານະປັດຈຸບັນ
 $stmt = mysqli_prepare($connect, "SELECT user_id, username, role, status FROM users WHERE username = ?");
 mysqli_stmt_bind_param($stmt, 's', $target_username);

@@ -23,18 +23,7 @@ $imgResult = mysqli_query($connect, $imgQuery);
 $images = [];
 while ($img = mysqli_fetch_assoc($imgResult)) { $images[] = $img; }
 
-// ດຶງປະເພດທັງໝົດ (safe: table may not exist on all envs)
-$allCategories = [];
-$catResult = mysqli_query($connect, "SELECT * FROM heritage_categories ORDER BY category_id");
-if ($catResult) { while ($cat = mysqli_fetch_assoc($catResult)) { $allCategories[] = $cat; } }
-
-// ດຶງປະເພດຂອງເຮືອນນີ້
-$houseCatIds = [];
-$hcResult = mysqli_query($connect, "SELECT category_id FROM house_categories WHERE house_id = $house_id");
-if ($hcResult) { while ($hc = mysqli_fetch_assoc($hcResult)) { $houseCatIds[] = $hc['category_id']; } }
-
-
-$message = ''; 
+$message = '';
 $message_type = '';
 $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 $upload_dir = '../uploads/';
@@ -44,11 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $house_number          = isset($_POST['house_number'])              ? mysqli_real_escape_string($connect, $_POST['house_number'])              : '';
     $house_name_lo         = isset($_POST['house_name_lo'])             ? mysqli_real_escape_string($connect, $_POST['house_name_lo'])             : '';
     $house_name_en         = isset($_POST['house_name_en'])             ? mysqli_real_escape_string($connect, $_POST['house_name_en'])             : '';
-    $owner_name_lo         = isset($_POST['owner_name_lo'])             ? mysqli_real_escape_string($connect, $_POST['owner_name_lo'])             : '';
-    $owner_name_en         = isset($_POST['owner_name_en'])             ? mysqli_real_escape_string($connect, $_POST['owner_name_en'])             : '';
     $construction_year     = isset($_POST['construction_year']) && !empty($_POST['construction_year']) ? intval($_POST['construction_year']) : 'NULL';
-    $architectural_style_lo= isset($_POST['architectural_style_lo'])    ? mysqli_real_escape_string($connect, $_POST['architectural_style_lo'])    : '';
-    $architectural_style_en= isset($_POST['architectural_style_en'])    ? mysqli_real_escape_string($connect, $_POST['architectural_style_en'])    : '';
     $historical_significance_lo = isset($_POST['historical_significance_lo']) ? mysqli_real_escape_string($connect, $_POST['historical_significance_lo']) : '';
     $historical_significance_en = isset($_POST['historical_significance_en']) ? mysqli_real_escape_string($connect, $_POST['historical_significance_en']) : '';
     $description_lo        = isset($_POST['description_lo'])            ? mysqli_real_escape_string($connect, $_POST['description_lo'])            : '';
@@ -104,13 +89,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         qr_code='$qr_code', 
         house_number='$house_number', 
         house_name_lo='$house_name_lo', 
-        house_name_en='$house_name_en', 
-        owner_name_lo='$owner_name_lo', 
-        owner_name_en='$owner_name_en', 
-        construction_year=$construction_year, 
-        architectural_style_lo='$architectural_style_lo', 
-        architectural_style_en='$architectural_style_en', 
-        historical_significance_lo='$historical_significance_lo', 
+        house_name_en='$house_name_en',
+        construction_year=$construction_year,
+        historical_significance_lo='$historical_significance_lo',
         historical_significance_en='$historical_significance_en', 
         description_lo='$description_lo', 
         description_en='$description_en', 
@@ -123,15 +104,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     WHERE house_id=$house_id";
     
     if (mysqli_query($connect, $updateQuery)) {
-        // ອັບເດດ house_categories (safe: table may not exist)
-        @mysqli_query($connect, "DELETE FROM house_categories WHERE house_id=$house_id");
-        if (isset($_POST['categories']) && is_array($_POST['categories'])) {
-            foreach ($_POST['categories'] as $cat_id) {
-                $cat_id = intval($cat_id);
-                @mysqli_query($connect, "INSERT IGNORE INTO house_categories (house_id, category_id) VALUES ($house_id, $cat_id)");
-            }
-        }
-
         // ອັບໂຫຼດຮູບເພີ່ມເຕີມ
         if (isset($_FILES['additional_images']) && !empty($_FILES['additional_images']['name'][0])) {
             $cntRes = mysqli_query($connect, "SELECT COUNT(*) as cnt FROM heritage_images WHERE house_id = $house_id");
@@ -166,11 +138,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
-
-        // ອັບເດດ houseCatIds ຫຼັງ save
-        $houseCatIds = [];
-        $hcResult2 = mysqli_query($connect, "SELECT category_id FROM house_categories WHERE house_id=$house_id");
-        if ($hcResult2) { while ($hc2 = mysqli_fetch_assoc($hcResult2)) { $houseCatIds[] = $hc2['category_id']; } }
 
         $message = 'ອັບເດດຂໍ້ມູນສຳເລັດ!';
         $message_type = 'success';
@@ -255,26 +222,8 @@ $slots = max(0, 3 - count($images));
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">ເຈົ້າຂອງ (ລາວ)</label>
-                                <input type="text" name="owner_name_lo" class="form-control" value="<?php echo htmlspecialchars($house['owner_name_lo']); ?>">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Owner Name (En)</label>
-                                <input type="text" name="owner_name_en" class="form-control" value="<?php echo htmlspecialchars($house['owner_name_en']); ?>">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
                                 <label class="form-label">ປີກໍ່ສ້າງ</label>
                                 <input type="number" name="construction_year" class="form-control" value="<?php echo $house['construction_year']; ?>" min="1800" max="2100">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">ສະຖາປັດຕະຍະກຳ (ລາວ)</label>
-                                <input type="text" name="architectural_style_lo" class="form-control" value="<?php echo htmlspecialchars($house['architectural_style_lo']); ?>">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Architectural Style (En)</label>
-                                <input type="text" name="architectural_style_en" class="form-control" value="<?php echo htmlspecialchars($house['architectural_style_en']); ?>">
                             </div>
                         </div>
                         <div class="row">
@@ -354,29 +303,6 @@ $slots = max(0, 3 - count($images));
                 </div>
             </div>
         </div>
-
-        <!-- ===== ປະເພດ (Categories) ===== -->
-        <?php if (!empty($allCategories)): ?>
-        <div class="card-custom">
-            <div class="card-body">
-                <div class="section-title"><i class="fas fa-tags"></i> ປະເພດເຮືອນມໍລະດົກ</div>
-                <div class="cat-grid">
-                    <?php
-                    $catColors = [1=>'#b5835a',2=>'#dfb26a',3=>'#22577a',4=>'#38a3a5',5=>'#e07a5f'];
-                    foreach ($allCategories as $cat):
-                        $checked = in_array($cat['category_id'], $houseCatIds);
-                        $color = $catColors[$cat['category_id']] ?? '#2d6a4f';
-                    ?>
-                    <label class="cat-item <?php echo $checked ? 'selected' : ''; ?>" id="catlabel_<?php echo $cat['category_id']; ?>">
-                        <input type="checkbox" name="categories[]" value="<?php echo $cat['category_id']; ?>" <?php echo $checked ? 'checked' : ''; ?> onchange="toggleCatStyle(this)">
-                        <span class="cat-dot" style="background:<?php echo $color; ?>;"></span>
-                        <div class="cat-label-wrap" style="font-size:0.85rem;"><?php echo htmlspecialchars($cat['category_name_lo']); ?></div>
-                    </label>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-        </div>
-        <?php endif; ?>
 
         <!-- ===== ແຜນທີ່ (Map Picker) ===== -->
         <div class="card-custom">
@@ -552,13 +478,6 @@ document.getElementById('statusToggle').addEventListener('change', function() {
     document.getElementById('statusLabel').textContent = this.checked ? '✅ ເປີດໃຊ້ງານ' : '⛔ ປິດໃຊ້ງານ';
     document.getElementById('statusHidden').value = this.checked ? 'active' : 'inactive';
 });
-
-// ===== Category style =====
-function toggleCatStyle(cb) {
-    const label = cb.closest('.cat-item');
-    if (cb.checked) label.classList.add('selected');
-    else label.classList.remove('selected');
-}
 
 // ===== Additional Images =====
 var maxSlots = <?php echo $slots; ?>;

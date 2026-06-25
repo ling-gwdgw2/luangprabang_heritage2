@@ -3,11 +3,19 @@
 // ໄຟລ໌: map.php
 // ໜ້າສະແດງແຜນທີ່ເຮືອນມໍລະດົກຫຼວງພະບາງ
 // ============================================
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 include_once 'config/database.php';
 
 // ກວດສອບພາສາ
 $lang = isset($_GET['lang']) ? trim($_GET['lang']) : 'lo';
 if ($lang !== 'en') $lang = 'lo';
+
+// ກວດສອບວ່າເປັນຜູ້ດູແລລະບົບ (ເຂົ້າສູ່ລະບົບແລ້ວ) ຫຼື ຜູ້ເຂົ້າຊົມທົ່ວໄປ
+$isAdmin = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
+// ປຸ່ມ "ກັບຄືນ": ຜູ້ດູແລ → admin/dashboard.php, ຜູ້ເຂົ້າຊົມ → index.php
+$backUrl = $isAdmin ? 'admin/dashboard.php' : 'index.php?lang=' . urlencode($lang);
 
 // ດຶງຂໍ້ມູນປະເພດທັງໝົດ
 $cat_query = "SELECT * FROM heritage_categories";
@@ -453,7 +461,7 @@ while ($row = mysqli_fetch_assoc($house_result)) {
     <div class="glass-panel title-card">
         <h4 id="title-main"><i class="fas fa-map-marked-alt"></i> ແຜນທີ່ເຮືອນມໍລະດົກ</h4>
         <p id="subtitle-main">ສຳຫຼວດ ແລະ ຄົ້ນຫາ ສະຖານທີ່ສຳຄັນທາງປະຫວັດສາດ ແລະ ເຮືອນມໍລະດົກຫຼວງພະບາງ</p>
-        <a href="index.php?lang=<?php echo $lang; ?>" class="btn-back-home" id="btn-back"><i class="fas fa-chevron-left"></i> <span id="btn-back-text">ກັບຄືນໜ້າຫຼັກ</span></a>
+        <a href="<?php echo htmlspecialchars($backUrl); ?>" class="btn-back-home" id="btn-back"><i class="fas fa-chevron-left"></i> <span id="btn-back-text">ກັບຄືນໜ້າຫຼັກ</span></a>
     </div>
     
     <!-- Sidebar Filter panel -->

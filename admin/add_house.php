@@ -19,6 +19,11 @@ if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
 $message = '';
 $message_type = '';
 
+// ດຶງປະເພດທັງໝົດ ໃຫ້ກົງກັບແຜນທີ່ (map.php)
+$allCategories = [];
+$catResult = mysqli_query($connect, "SELECT * FROM heritage_categories ORDER BY category_id");
+if ($catResult) { while ($cat = mysqli_fetch_assoc($catResult)) { $allCategories[] = $cat; } }
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // ເອົາຄ່າຂໍ້ມູນມາ escape ກ່ອນ
     $qr_code = mysqli_real_escape_string($connect, trim($_POST['qr_code'] ?? ''));
@@ -92,6 +97,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         if (mysqli_query($connect, $sql)) {
             $house_id = mysqli_insert_id($connect);
+
+            // ບັນທຶກ house_categories (safe: table may not exist)
+            if (isset($_POST['categories']) && is_array($_POST['categories'])) {
+                foreach ($_POST['categories'] as $cat_id) {
+                    $cat_id = intval($cat_id);
+                    @mysqli_query($connect, "INSERT IGNORE INTO house_categories (house_id, category_id) VALUES ($house_id, $cat_id)");
+                }
+            }
             
             // ຮູບພາບເພີ່ມເຕີມ
             if (isset($_FILES['additional_images']) && !empty($_FILES['additional_images']['name'][0])) {
@@ -252,6 +265,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
 
+        <!-- ===== ປະເພດ (Categories) — ສີກົງກັບແຜນທີ່ map.php ===== -->
+        <?php if (!empty($allCategories)): ?>
+        <div class="card-custom">
+            <h5 class="mb-3"><i class="fas fa-tags text-success"></i> ປະເພດເຮືອນມໍລະດົກ</h5>
+            <div class="cat-grid">
+                <?php
+                $catColors = [1=>'#b5835a',2=>'#dfb26a',3=>'#22577a',4=>'#38a3a5',5=>'#e07a5f'];
+                foreach ($allCategories as $cat):
+                    $color = $catColors[$cat['category_id']] ?? '#2d6a4f';
+                ?>
+                <label class="cat-item" id="catlabel_<?php echo $cat['category_id']; ?>">
+                    <input type="checkbox" name="categories[]" value="<?php echo $cat['category_id']; ?>" onchange="toggleCatStyle(this)">
+                    <span class="cat-dot" style="background:<?php echo $color; ?>;"></span>
+                    <div class="cat-label-wrap" style="font-size:0.85rem;"><?php echo htmlspecialchars($cat['category_name_lo']); ?></div>
+                </label>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <!-- ===== ແຜນທີ່ (Map Picker) ===== -->
         <div class="card-custom">
             <div class="card-body">
@@ -342,6 +375,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+function toggleCatStyle(cb) {
+    const label = cb.closest('.cat-item');
+    if (cb.checked) label.classList.add('selected');
+    else label.classList.remove('selected');
+}
+
 function addImageRow() {
     const html = `
         <div class="row mb-2 image-row">

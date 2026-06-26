@@ -13,20 +13,9 @@ if ($lang !== 'en') $lang = 'lo';
 $fromAdmin = isset($_GET['from']) && $_GET['from'] === 'admin';
 $backUrl = $fromAdmin ? 'admin/dashboard.php' : 'index.php?lang=' . urlencode($lang);
 
-// ດຶງຂໍ້ມູນປະເພດທັງໝົດ
-$cat_query = "SELECT * FROM heritage_categories";
-$cat_result = mysqli_query($connect, $cat_query);
-$categories = [];
-while ($row = mysqli_fetch_assoc($cat_result)) {
-    $categories[] = $row;
-}
-
 // ດຶงຂໍ້ມູນເຮືອນທີ່ມີພິກັດ
-$house_query = "SELECT h.*, GROUP_CONCAT(hc.category_id) as category_ids 
-                FROM heritage_houses h
-                LEFT JOIN house_categories hc ON h.house_id = hc.house_id
-                WHERE h.status = 'active' AND h.latitude IS NOT NULL AND h.longitude IS NOT NULL AND h.latitude != 0 AND h.longitude != 0
-                GROUP BY h.house_id";
+$house_query = "SELECT * FROM heritage_houses
+                WHERE status = 'active' AND latitude IS NOT NULL AND longitude IS NOT NULL AND latitude != 0 AND longitude != 0";
 $house_result = mysqli_query($connect, $house_query);
 $houses = [];
 while ($row = mysqli_fetch_assoc($house_result)) {
@@ -460,34 +449,6 @@ while ($row = mysqli_fetch_assoc($house_result)) {
         <a href="<?php echo htmlspecialchars($backUrl); ?>" class="btn-back-home" id="btn-back"><i class="fas fa-chevron-left"></i> <span id="btn-back-text">ກັບຄືນໜ້າຫຼັກ</span></a>
     </div>
     
-    <!-- Sidebar Filter panel -->
-    <div class="glass-panel filter-panel">
-        <h5 id="filter-title">ປະເພດເຮືອນມໍລະດົກ</h5>
-        <div class="filter-items-wrapper">
-            <label class="filter-item">
-                <input type="checkbox" id="filter-all" checked onchange="toggleAllFilters(this)">
-                <span class="filter-color-dot" style="background: #2d6a4f;"></span>
-                <span id="filter-all-text">ທັງໝົດ</span>
-            </label>
-            <?php foreach ($categories as $cat) { 
-                $cat_name = ($lang === 'lo') ? $cat['category_name_lo'] : $cat['category_name_en'];
-                $color = [
-                    1 => '#b5835a', // traditional
-                    2 => '#dfb26a', // temple
-                    3 => '#22577a', // colonial
-                    4 => '#38a3a5', // hybrid
-                    5 => '#e07a5f'  // shop
-                ][$cat['category_id']] ?? '#2d6a4f';
-            ?>
-                <label class="filter-item">
-                    <input type="checkbox" class="category-filter" value="<?php echo $cat['category_id']; ?>" checked onchange="applyFilters()">
-                    <span class="filter-color-dot" style="background: <?php echo $color; ?>;"></span>
-                    <span><?php echo htmlspecialchars($cat_name); ?></span>
-                </label>
-            <?php } ?>
-        </div>
-    </div>
-    
     <!-- Quick Actions Panel -->
     <div class="action-buttons">
         <button class="btn-circle" onclick="locateUser()" title="ຊອກຫາຕຳແໜ່ງຂອງຂ້ອຍ" id="btn-locate"><i class="fas fa-crosshairs"></i></button>
@@ -503,22 +464,9 @@ while ($row = mysqli_fetch_assoc($house_result)) {
         const housesData = <?php echo json_encode($houses); ?>;
         const currentLang = '<?php echo $lang; ?>';
         
-        const categoryColors = {
-            1: '#b5835a', // Traditional House
-            2: '#dfb26a', // Temple
-            3: '#22577a', // French Colonial
-            4: '#38a3a5', // Lao-French
-            5: '#e07a5f'  // Shop House
-        };
-        
-        const categoryIcons = {
-            1: 'fas fa-home',
-            2: 'fas fa-dharmachakra',
-            3: 'fas fa-building',
-            4: 'fas fa-landmark',
-            5: 'fas fa-store'
-        };
-        
+        const markerColor = '#2d6a4f';
+        const markerIconClass = 'fas fa-landmark';
+
         const translations = {
             lo: {
                 title: 'ແຜນທີ່ເຮືອນມໍລະດົກ',
@@ -563,20 +511,15 @@ while ($row = mysqli_fetch_assoc($house_result)) {
             $('#title-main').html(`<i class="fas fa-map-marked-alt"></i> ${t.title}`);
             $('#subtitle-main').text(t.subtitle);
             $('#btn-back-text').text(t.back);
-            $('#filter-title').text(t.filter_title);
-            $('#filter-all-text').text(t.all);
             $('#lang-text').text(t.lang_btn);
         }
         
-        function createCustomIcon(categoryId) {
-            const color = categoryColors[categoryId] || '#2d6a4f';
-            const iconClass = categoryIcons[categoryId] || 'fas fa-landmark';
-            
+        function createCustomIcon() {
             const htmlContent = `
                 <div class="custom-marker-wrapper">
                     <div class="custom-marker-shadow"></div>
-                    <div class="custom-marker-pin" style="background: ${color};">
-                        <i class="${iconClass}"></i>
+                    <div class="custom-marker-pin" style="background: ${markerColor};">
+                        <i class="${markerIconClass}"></i>
                     </div>
                 </div>
             `;
@@ -606,79 +549,46 @@ while ($row = mysqli_fetch_assoc($house_result)) {
             markerLayerGroup = L.layerGroup().addTo(map);
             
             // ສະແດງ Markers
-            applyFilters();
+            renderMarkers();
             
             // ຖ້າມີຂໍ້ມູນພິກັດ, ປັບຂອບເຂດແຜນທີ່ໃຫ້ພໍດີກັບ Markers ທັງໝົດ
             fitMapBounds();
         }
         
-        function toggleAllFilters(allCheckbox) {
-            const isChecked = $(allCheckbox).is(':checked');
-            $('.category-filter').prop('checked', isChecked);
-            applyFilters();
-        }
-        
-        function updateAllCheckboxState() {
-            const totalFilters = $('.category-filter').length;
-            const checkedFilters = $('.category-filter:checked').length;
-            $('#filter-all').prop('checked', totalFilters === checkedFilters);
-        }
-        
-        function applyFilters() {
-            updateAllCheckboxState();
-            
-            const checkedFilters = [];
-            $('.category-filter:checked').each(function() {
-                checkedFilters.push(Number($(this).val()));
-            });
-            
-            const allChecked = $('#filter-all').is(':checked');
-            
+        function renderMarkers() {
             // ລ້າງ Markers ເກົ່າ
             markerLayerGroup.clearLayers();
-            
+
             housesData.forEach(house => {
-                const catIds = house.category_ids ? house.category_ids.split(',').map(Number) : [];
-                
-                let show = false;
-                if (allChecked) {
-                    show = true;
-                } else {
-                    show = catIds.some(id => checkedFilters.includes(id));
-                }
-                
-                if (show) {
-                    const lat = parseFloat(house.latitude);
-                    const lng = parseFloat(house.longitude);
-                    
-                    const primaryCatId = catIds.length > 0 ? catIds[0] : 0;
-                    const markerIcon = createCustomIcon(primaryCatId);
-                    
-                    const marker = L.marker([lat, lng], { icon: markerIcon });
-                    
-                    const houseName = currentLang === 'lo' ? house.house_name_lo : house.house_name_en;
-                    const style = currentLang === 'lo' ? house.architectural_style_lo : house.architectural_style_en;
-                    const detailUrl = `heritage_detail.php?id=${encodeURIComponent(house.qr_code)}&lang=${currentLang}`;
-                    
-                    const popupContent = `
-                        <div class="popup-card">
-                            <img class="popup-img" src="${house.image_src}" onerror="this.src='https://placehold.co/300x200/2d6a4f/white?text=Luang+Prabang'">
-                            <div class="popup-body">
-                                <div class="popup-title">${escapeHtml(houseName || house.house_number || 'Heritage Building')}</div>
-                                <div class="popup-meta">
-                                    ${house.construction_year ? `<span><i class="fas fa-calendar-alt"></i> ${translations[currentLang].year_built}: ${house.construction_year}</span>` : ''}
-                                    ${style ? `<br><span><i class="fas fa-building"></i> ${escapeHtml(style)}</span>` : ''}
-                                </div>
-                                <a href="${detailUrl}" class="popup-btn">
-                                    <i class="fas fa-info-circle"></i> ${translations[currentLang].view_detail}
-                                </a>
+                const lat = parseFloat(house.latitude);
+                const lng = parseFloat(house.longitude);
+                if (isNaN(lat) || isNaN(lng)) return;
+
+                const markerIcon = createCustomIcon();
+                const marker = L.marker([lat, lng], { icon: markerIcon });
+
+                const houseName = currentLang === 'lo' ? house.house_name_lo : house.house_name_en;
+                const style = currentLang === 'lo' ? house.architectural_style_lo : house.architectural_style_en;
+                const detailUrl = `heritage_detail.php?id=${encodeURIComponent(house.qr_code)}&lang=${currentLang}`;
+
+                const popupContent = `
+                    <div class="popup-card">
+                        <img class="popup-img" src="${house.image_src}" onerror="this.src='https://placehold.co/300x200/2d6a4f/white?text=Luang+Prabang'">
+                        <div class="popup-body">
+                            <div class="popup-title">${escapeHtml(houseName || house.house_number || 'Heritage Building')}</div>
+                            <div class="popup-meta">
+                                ${house.construction_year ? `<span><i class="fas fa-calendar-alt"></i> ${translations[currentLang].year_built}: ${house.construction_year}</span>` : ''}
+                                ${style ? `<br><span><i class="fas fa-building"></i> ${escapeHtml(style)}</span>` : ''}
                             </div>
+                            <a href="${detailUrl}" class="popup-btn">
+                                <i class="fas fa-info-circle"></i> ${translations[currentLang].view_detail}
+                            </a>
                         </div>
-                    `;
-                    
-                    marker.bindPopup(popupContent);
-                    markerLayerGroup.addLayer(marker);
-                }
+                    </div>
+                `;
+
+                marker.bindPopup(popupContent);
+                markerLayerGroup.addLayer(marker);
             });
         }
         

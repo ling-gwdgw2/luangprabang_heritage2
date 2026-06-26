@@ -23,16 +23,6 @@ $imgResult = mysqli_query($connect, $imgQuery);
 $images = [];
 while ($img = mysqli_fetch_assoc($imgResult)) { $images[] = $img; }
 
-// ດຶງປະເພດທັງໝົດ (safe: table may not exist on all envs)
-$allCategories = [];
-$catResult = mysqli_query($connect, "SELECT * FROM heritage_categories ORDER BY category_id");
-if ($catResult) { while ($cat = mysqli_fetch_assoc($catResult)) { $allCategories[] = $cat; } }
-
-// ດຶງປະເພດຂອງເຮືອນນີ້
-$houseCatIds = [];
-$hcResult = mysqli_query($connect, "SELECT category_id FROM house_categories WHERE house_id = $house_id");
-if ($hcResult) { while ($hc = mysqli_fetch_assoc($hcResult)) { $houseCatIds[] = $hc['category_id']; } }
-
 $message = '';
 $message_type = '';
 $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
@@ -114,15 +104,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     WHERE house_id=$house_id";
     
     if (mysqli_query($connect, $updateQuery)) {
-        // ອັບເດດ house_categories (safe: table may not exist)
-        @mysqli_query($connect, "DELETE FROM house_categories WHERE house_id=$house_id");
-        if (isset($_POST['categories']) && is_array($_POST['categories'])) {
-            foreach ($_POST['categories'] as $cat_id) {
-                $cat_id = intval($cat_id);
-                @mysqli_query($connect, "INSERT IGNORE INTO house_categories (house_id, category_id) VALUES ($house_id, $cat_id)");
-            }
-        }
-
         // ອັບໂຫຼດຮູບເພີ່ມເຕີມ
         if (isset($_FILES['additional_images']) && !empty($_FILES['additional_images']['name'][0])) {
             $cntRes = mysqli_query($connect, "SELECT COUNT(*) as cnt FROM heritage_images WHERE house_id = $house_id");
@@ -157,11 +138,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
-
-        // ອັບເດດ houseCatIds ຫຼັງ save
-        $houseCatIds = [];
-        $hcResult2 = mysqli_query($connect, "SELECT category_id FROM house_categories WHERE house_id=$house_id");
-        if ($hcResult2) { while ($hc2 = mysqli_fetch_assoc($hcResult2)) { $houseCatIds[] = $hc2['category_id']; } }
 
         $message = 'ອັບເດດຂໍ້ມູນສຳເລັດ!';
         $message_type = 'success';
@@ -327,29 +303,6 @@ $slots = max(0, 3 - count($images));
                 </div>
             </div>
         </div>
-
-        <!-- ===== ປະເພດ (Categories) — ສີກົງກັບແຜນທີ່ map.php ===== -->
-        <?php if (!empty($allCategories)): ?>
-        <div class="card-custom">
-            <div class="card-body">
-                <div class="section-title"><i class="fas fa-tags"></i> ປະເພດເຮືອນມໍລະດົກ</div>
-                <div class="cat-grid">
-                    <?php
-                    $catColors = [1=>'#b5835a',2=>'#dfb26a',3=>'#22577a',4=>'#38a3a5',5=>'#e07a5f'];
-                    foreach ($allCategories as $cat):
-                        $checked = in_array($cat['category_id'], $houseCatIds);
-                        $color = $catColors[$cat['category_id']] ?? '#2d6a4f';
-                    ?>
-                    <label class="cat-item <?php echo $checked ? 'selected' : ''; ?>" id="catlabel_<?php echo $cat['category_id']; ?>">
-                        <input type="checkbox" name="categories[]" value="<?php echo $cat['category_id']; ?>" <?php echo $checked ? 'checked' : ''; ?> onchange="toggleCatStyle(this)">
-                        <span class="cat-dot" style="background:<?php echo $color; ?>;"></span>
-                        <div class="cat-label-wrap" style="font-size:0.85rem;"><?php echo htmlspecialchars($cat['category_name_lo']); ?></div>
-                    </label>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-        </div>
-        <?php endif; ?>
 
         <!-- ===== ແຜນທີ່ (Map Picker) ===== -->
         <div class="card-custom">
@@ -596,13 +549,6 @@ document.getElementById('main_image').addEventListener('change', function(e) {
 function removeMainImage() {
     document.getElementById('currentImageWrap') && (document.getElementById('currentImageWrap').style.display = 'none');
     document.getElementById('remove_image_main').value = '1';
-}
-
-// ===== Category style =====
-function toggleCatStyle(cb) {
-    const label = cb.closest('.cat-item');
-    if (cb.checked) label.classList.add('selected');
-    else label.classList.remove('selected');
 }
 
 // ===== Submit with Confirm =====
